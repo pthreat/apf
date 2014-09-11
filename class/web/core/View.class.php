@@ -4,14 +4,14 @@
 
 	   class View{
 
-			private	static	$header	=	NULL;
-			private	$_templates			=	Array();
-			private	$_vars				=	Array();
-			private	$_messages			=	NULL;
-			private	$_singleTplPath	=	NULL;
-			private	static	$footer	=	NULL;
+			private	$templates		=	Array();
+			private	$vars				=	Array();
+			private	$messages		=	NULL;
 
 			public function __construct($templates=NULL){
+
+				$config	=	\apf\core\Config::getSection("view");
+				$this->validateConfig($config);
 
 				if(is_null($templates)){
 
@@ -34,17 +34,36 @@
 
 			}
 
-			public function addTemplate($template=NULL,$first=NULL){
+			public function renderPack($pathToPackFile){
 
-				\apf\Validator::emptyString($template,"Template to be added can't be empty");
 
 				$config	=	\apf\core\Config::getSection("view");
 				$this->validateConfig($config);
 
 				$path			=	$config->template_path;
-				$ext			=	trim($config->template_extension,'.');
-				$template	=	strpos($template,".$ext")	?	$template	:	$template.".$ext";
-				$this->_templates[]	=	new \apf\core\File($path.DIRECTORY_SEPARATOR.$template);
+				$packFile	=	$path.DIRECTORY_SEPARATOR.$pathToPackFile;
+
+				$packFile	=	new \apf\core\File($packFile);
+				$packFile->setReadFunction("fgets");
+
+				foreach($packFile as $line){
+					$line	=	trim($line,"\r\n");
+					$this->load($line);
+				}
+
+				$packFile->close();
+
+				die();
+
+			}
+
+			public function addTemplate($template=NULL,$first=NULL){
+
+				\apf\Validator::emptyString($template,"Template to be added can't be empty");
+
+				$config		=	\apf\core\Config::getSection("view");
+				$path			=	$config->template_path;
+				$this->templates[]	=	new \apf\core\File($path.DIRECTORY_SEPARATOR.$template);
 
 				return TRUE;
 
@@ -83,23 +102,9 @@
 
 			}
 
-			public static function setHeader($template){
-				self::$header	=	$template;
-			}
-
-			public static function setFooter($template){
-				self::$footer	=	$template;
-			}
-
-			public function addFirst($template){
-
-
-
-			}
-
 			public function getTemplates(){
 
-				return $this->_templates;
+				return $this->templates;
 
 			}
 
@@ -109,39 +114,34 @@
 
 		   }
 
-			private function load($base=NULL,$tpl=NULL){
+			private function load($tpl=NULL){
 
-				\apf\Validator::emptyString($base);
+				static $template	=	NULL;
+
+				$template	=	$tpl;
+
+				\apf\Validator::emptyString($tpl,"Must provide template name to load");
+
+				$config	=	\apf\core\Config::getSection("view");
+				$this->validateConfig($config);
+
+				$ext		=	trim($config->template_extension,'.');
+				$tpl		=	strpos($tpl,".$ext")	?	$tpl	:	$tpl.".$ext";
+				$tpl		=	$config->template_path.DIRECTORY_SEPARATOR.$tpl;
 
 				try{
 
-					$config	=	\apf\core\Config::getSection("view");
-					$this->validateConfig($config);
-
-					$ext		=	$config->template_extension;
-
-					if(is_null($tpl)){
-
-						$tpl	=	new \apf\core\File($this->_singleTplPath.DIRECTORY_SEPARATOR.$base.".$ext");
-						require $tpl;
-						return;
-
-					}
-
-					$tpl		=	preg_replace("/\W/",'',$tpl);
-					$path		=	$config->template_path.DIRECTORY_SEPARATOR.$base;
-					$tpl		=	$path.DIRECTORY_SEPARATOR."$tpl.$ext";
 					$tpl		=	new \apf\core\File($tpl);
-
 					require $tpl;
 
 				}catch(\Exception $e){
 
-					throw(new \Exception("Template $tpl not found in: ".$this->_singleTplPath));
+					throw new \Exception("Template $template not found in ".$config->template_path);
 
 				}
 
 			}
+
 
 			public function setVarArray(Array &$values){
 
@@ -155,13 +155,13 @@
 
 			public function getVars(){
 
-				return $this->_vars;
+				return $this->vars;
 
 			}
 
 			public function renderAsString(){
 
-				if(!sizeof($this->_templates)){
+				if(!sizeof($this->templates)){
 
 					throw(new \Exception("Can't call render(), no templates have been added to this View object"));
 					return;
@@ -182,41 +182,24 @@
 
 			public function render() {
 
-				if(!sizeof($this->_templates)){
+				if(!sizeof($this->templates)){
 
 					throw(new \Exception("Can't call render(), no templates have been added to this View object"));
 					return;
 
 				}
 
-				if(self::$header){
+				foreach($this->templates as $template){
 
-					$this->addTemplate(self::$header);
-
-				}
-
-				foreach($this->_templates as $template){
-
-					$this->_singleTplPath	=	dirname($template);
 					$this->load($template);
 
 				}
-
-				if(self::$footer){
-
-					$this->addTemplate(self::$footer);
-					$this->load(array_pop($this->_templates));
-
-				}
-
-				$this->_singleTplPath	=	NULL;
-
 
 			}
 
 			public function resetTemplates(){
 
-				$this->_templates	=	Array();
+				$this->templates	=	Array();
 
 			}
 
@@ -224,13 +207,13 @@
 
 				$str	=	NULL;
 
-				if(!sizeof($this->_templates)){
+				if(!sizeof($this->templates)){
 
 					return "";
 
 				}
 
-				foreach($this->_templates as $template){
+				foreach($this->templates as $template){
 
 					$str	.= file_get_contents($template);
 

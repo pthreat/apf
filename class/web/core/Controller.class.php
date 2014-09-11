@@ -20,7 +20,7 @@
 
 			public function construct(){
 				
-				$controller				=	substr(getclass($this),strlen(NAMESPACE)+1);
+				$controller				=	substr(get_class($this),strlen(__NAMESPACE__)+1);
 				$controller				=	strtolower(substr($controller,0,strpos($controller,"Controller")));
 				$this->controller		=	$controller;
 
@@ -32,7 +32,7 @@
 
 				$view			=	new View($templates);
 
-				$controller	=	getclass($this);
+				$controller	=	get_class($this);
 				$controller	=	substr($controller,strrpos($controller,"\\")+1);
 				$controller	=	substr($controller,0,strpos($controller,"Controller"));
 

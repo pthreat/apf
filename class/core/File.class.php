@@ -4,14 +4,13 @@
 
 		class File implements \Iterator{
 
-			private	$_dirname		=	NULL;
-			private	$_file			=	NULL;
-			private	$_contents		=	NULL;
-
-			private	$_fp				=	NULL;
-			private	$_line			=	NULL;
-			private	$_fetchTimes	=	NULL;
-			private	$_readFn			=	"fread";
+			private	$dirname		=	NULL;
+			private	$file			=	NULL;
+			private	$contents	=	NULL;
+			private	$fp			=	NULL;
+			private	$line			=	NULL;
+			private	$fetchTimes	=	NULL;
+			private	$readFn		=	"fread";
 
 			public function __construct($file=NULL){
 
@@ -31,22 +30,23 @@
 
 			public function rewind(){
 
-				if(!is_null($this->_fp)){
-					fseek($this->_fp,0);
+				if(!is_null($this->fp)){
+					fseek($this->fp,0);
 				}
+
 				$this->fetch();
 
 			}
 
 			public function current(){
 
-				return $this->_line;
+				return $this->line;
 
 			}
 
 			public function key(){
 
-				return $this->_fetchTimes;
+				return $this->fetchTimes;
 
 			}
 
@@ -58,14 +58,14 @@
 
 			public function close(){
 
-				if(is_null($this->_fp)){
+				if(is_null($this->fp)){
 
 					throw(new \Exception("Theres no file handler open, the file can't be closed"));
 
 				}
 
-				fclose($this->_fp);
-				$this->_fp	=	NULL;
+				fclose($this->fp);
+				$this->fp	=	NULL;
 
 			}
 
@@ -77,21 +77,21 @@
 
 				}
 
-				if(!is_null($this->_fp)){
+				if(!is_null($this->fp)){
 
-					return $this->_fp;
+					return $this->fp;
 
 				}
 
-				$this->_fp	=	fopen($this,$mode);
+				$this->fp	=	fopen($this,$mode);
 
-				if(!$this->_fp){
+				if(!$this->fp){
 
 						throw(new \Exception("Can't open file $this file with mode \"$mode\""));
 
 				}
 
-				return $this->_fp;
+				return $this->fp;
 
 			}
 
@@ -105,7 +105,7 @@
 
 				}
 
-				$this->_readFn	=	$fName;
+				$this->readFn		=	$fName;
 
 			}
 
@@ -119,19 +119,17 @@
 
 				$this->open();
 
-				$this->_fetchTimes++;
+				$this->fetchTimes++;
 
-				if(feof($this->_fp)){
+				if(feof($this->fp)){
 
-					return $this->_line	=	FALSE;
+					return $this->line	=	FALSE;
 
 				}
 
-				//Add possibility to use fgets (read a line) instead of fread (read n bytes)
-				$fragment		=	call_user_func($this->_readFn,$this->_fp,$bytes);
-				$this->_line	=	$fragment;
+				$this->line		=	call_user_func($this->readFn,$this->fp,$bytes);
 
-				return $this->_line;
+				return $this->line;
 
 			}
 
@@ -143,7 +141,7 @@
 
 			public function valid(){
 
-				return (!($this->_line===FALSE));
+				return (!($this->line===FALSE));
 
 			}
 
@@ -161,33 +159,33 @@
 
 			public function &getHandler(){
 
-				return $this->_fp;
+				return $this->fp;
 
 			}
 
 			public function setContents($contents=NULL){
 
-				$this->_contents	=	$contents;
+				$this->contents	=	$contents;
 
 			}
 
 
 			public function setFileName($file){
 
-				$this->_dirname = dirname($file);
-				$this->_file    = basename($file);
+				$this->dirname = dirname($file);
+				$this->file    = basename($file);
 
 			}
 
 			public function delete(){
 
-				return unlink($this->_dirname.DIRECTORY_SEPARATOR.$this->_file);
+				return unlink($this->dirname.DIRECTORY_SEPARATOR.$this->file);
 
 			}
 
 			public function write(){
 
-				file_put_contents($this->_dirname.DIRECTORY_SEPARATOR.$this->_file,$this->_contents);
+				file_put_contents($this->dirname.DIRECTORY_SEPARATOR.$this->file,$this->contents);
 
 			}
 
@@ -206,30 +204,30 @@
 			}
 
 			public function dirname(){
-				return $this->_dirname;
+				return $this->dirname;
 			}
 
 			public function basename(){
 
-				return $this->_basename;
+				return $this->basename;
 
 			}
 
 			public function getFile(){
 
-				return $this->_dirname.DIRECTORY_SEPARATOR.$this->_file;
+				return $this->dirname.DIRECTORY_SEPARATOR.$this->file;
 
 			}
 
 			public function getContents(){
 
-				return file_get_contents($this->_dirname.DIRECTORY_SEPARATOR.$this->_file);
+				return file_get_contents($this->dirname.DIRECTORY_SEPARATOR.$this->file);
 
 			}
 
 			public function getContentsAsArray(){
 
-				return file($this->_dirname.DIRECTORY_SEPARATOR.$this->_file);
+				return file($this->dirname.DIRECTORY_SEPARATOR.$this->file);
 
 			}
 
