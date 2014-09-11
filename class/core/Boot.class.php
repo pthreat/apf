@@ -69,13 +69,33 @@
 
 				}
 
-				$class	=	substr($class,strpos($class,"\\"));
+				$class	=	trim(substr($class,strpos($class,"\\")+1));
 				$path		=	explode("\\",$class);
 				$class	=	implode('/',$path);
 
-				$path		=	in_array("iface",$path)	?	"interface"	:	"class";
+				switch($path[0]){
 
-				$file		=	self::$frameworkDir.DIRECTORY_SEPARATOR.$path.$class.".$path.php";
+					case "component":
+						$file		=	self::$frameworkDir.DIRECTORY_SEPARATOR.
+						$class.".class.php";
+					break;
+
+					case "iface":
+						$file	=	self::$frameworkDir.DIRECTORY_SEPARATOR.
+									"interface".DIRECTORY_SEPARATOR.
+									$class.".interface.php";
+					break;
+
+					case "class":
+					default:
+						$file		=	self::$frameworkDir.DIRECTORY_SEPARATOR.
+										"class".DIRECTORY_SEPARATOR.
+										$class.".$path.php";
+					break;
+
+
+				}
+
 
 				if(!file_exists($file)){
 
@@ -94,6 +114,7 @@
 
 				self::$appDir			=	dirname($_SERVER["SCRIPT_FILENAME"]);
 				self::$frameworkDir	=	substr(dirname(__FILE__),0,strrpos(dirname(__FILE__),'class'));
+				self::$frameworkDir	=	rtrim(self::$frameworkDir,DIRECTORY_SEPARATOR);
 
 				//Assume that it's just one directory up the appDir
 
