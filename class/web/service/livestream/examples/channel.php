@@ -18,8 +18,8 @@
 	require "Api.class.php";
 	require "Response.class.php";
 
-	$httpAdapter	=	new \apolloFramework\http\adapter\Ecurl();
-	$ustream			=	new \apolloFramework\web\service\livestream\Api($httpAdapter);
+	$httpAdapter	=	new \apf\http\adapter\Ecurl();
+	$ustream			=	new \apf\web\service\livestream\Api($httpAdapter);
 	$channel			=	$ustream->channel("phpancho")->info();
 	var_dump($channel->isLive());
 	

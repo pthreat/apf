@@ -2,14 +2,14 @@
 
 	/**
 	*livestream API for PHP5 by Federico Stange
-	*for apolloFramework.
+	*for apf.
 	*
 	*Api doc: http://www.livestream.com/userguide/
 	*
 	*Code Example:
 	*
-	*$httpAdapter		=	new \apolloFramework\http\adapter\Ecurl();
-	*$livestream			=	new \apolloFramework\web\service\livestream\Api($httpAdapter);
+	*$httpAdapter		=	new \apf\http\adapter\Ecurl();
+	*$livestream			=	new \apf\web\service\livestream\Api($httpAdapter);
 	*$livestream->setFormat("json");
 	*$livestream->setKey(YOUR_API_KEY);
 	*$livestream->setSubjectId("pthreat");
@@ -17,9 +17,9 @@
 	*
 	*/
 
-	namespace apolloFramework\web\service\livestream{
+	namespace apf\web\service\livestream{
 
-		class Api extends \apolloFramework\web\Service{
+		class Api extends \apf\web\Service{
 
 			private	$channel				=	NULL;
 			private	$baseUri				=	"api.channel.livestream.com";
@@ -29,7 +29,7 @@
 			private	$callArgs			=	NULL;
 			private	$context				=	NULL;
 
-			public function __construct(\apolloFramework\http\Adapter $adapter=NULL,\apolloFramework\core\Config $config=NULL){
+			public function __construct(\apf\http\Adapter $adapter=NULL,\apf\core\Config $config=NULL){
 
 				parent::__construct($adapter,$config);
 				parent::setSupportedFormats(Array("json","xml"));
@@ -133,7 +133,7 @@
 
 				}
 
-				$this->setUri(new \apolloFramework\parser\Uri($uri));
+				$this->setUri(new \apf\parser\Uri($uri));
 				$this->adapter->setHttpMethod("GET");
 
 				$response	=	parent::request();

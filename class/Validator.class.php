@@ -1,6 +1,6 @@
 <?php
 
-	namespace apolloFramework{
+	namespace apf{
 
 		class Validator{
 

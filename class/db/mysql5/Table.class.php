@@ -1,6 +1,6 @@
 <?php
 
-	namespace db\mysql5{
+	namespace apf\db\mysql5{
 
 		class Table{
 
@@ -8,6 +8,7 @@
 			protected	$name		=	NULL;
 			protected	$fields	=	Array();
 			protected	$params	=	NULL;
+			protected	$alias	=	NULL;
 
 			public function __construct($name=NULL,$params=NULL){
 
@@ -143,7 +144,7 @@
 
 			public function setName($name=NULL){
 
-				\apolloFramework\Validator::emptyString($name,"Table name can't be empty");
+				\apf\Validator::emptyString($name,"Table name can't be empty");
 
 				$pos	=	strpos($name,'.');
 
@@ -162,11 +163,43 @@
 
 			}
 
-			public function getName(){
+			public function setAlias($alias){
 
-				return	$this->schema.'.'.$this->name;
+				$adapter			=	Adapter::getInstance($this->params);
+				$alias			=	$adapter->real_escape_string($alias);
+				$this->alias	=	$alias;
 
 			}
+
+			public function save(){
+
+				$columns	=	$this->getColumnsFromInformationSchema();
+				$code		=	"<?php namespace apf\\db\\mysql5{ class ".$this->name." extends Table{".
+				"protected \$data=\"".serialize($columns)."\";}}".
+				"?>";
+
+				return $code;
+
+			}
+
+			public function getName(){
+
+				if(is_null($this->alias)){
+
+					return $this->schema.'.'.$this->name;
+
+				}
+
+				return	$this->schema.'.'.$this->name." AS ".$this->alias ;
+
+			}
+
+			public function getAlias(){
+
+				return $this->alias;
+
+			}
+
 
 			public function getSchema(){
 				return $this->schema;
@@ -194,7 +227,7 @@
 
 			public function __toString(){
 
-				return $this->getName();
+				return (string)$this->getName();
 
 			}
 

@@ -4,9 +4,9 @@
 	*MySQL query Builder class, this class is used to build INSERT SQL queries
 	*/
 
-	namespace db\mysql5{
+	namespace apf\db\mysql5{
 
-		class Replace extends \db\mysql5\Query {
+		class Replace extends Query {
 
 			public function getSQL(){
 

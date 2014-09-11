@@ -1,6 +1,6 @@
 <?php
 
-	namespace apolloFramework\web\captcha{
+	namespace apf\web\captcha{
 
 		class ReCaptchaResponse {
 

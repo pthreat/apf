@@ -1,13 +1,13 @@
 <?php
 
-	namespace db\mysql5{
+	namespace apf\db\mysql5{
 
 		class Adapter{
 
-			private	static		$connections	=	Array();
+			private	static	$connections	=	Array();
 			private				$queryColor		=	"light_cyan";
 			private				$logger			=	NULL;
-			private				$verbose		=	0;
+			private				$verbose			=	0;
 			private				$connection		=	NULL;
 			private				$params			=	Array();
 
@@ -30,7 +30,7 @@
 
 			public function setQueryColor($color=NULL){
 
-				$this->queryColor	=	\apolloFramework\Validator::emptyString($color);
+				$this->queryColor	=	\apf\Validator::emptyString($color);
 
 			}
 
@@ -72,7 +72,7 @@
 				}
 
 				$requiredKeys	=	Array("user","pass","name","port");
-				\apolloFramework\Validator::arrayKeys($requiredKeys,$params);
+				\apf\Validator::arrayKeys($requiredKeys,$params);
 
 				if(!isset($params["host"])){
 
@@ -86,7 +86,7 @@
 
 				$msg	=	"Params for connecting to a MySQL Database should be ".implode(',',$requiredKeys);
 
-				\apolloFramework\Validator::arrayKeys($requiredKeys,$params,$msg);
+				\apf\Validator::arrayKeys($requiredKeys,$params,$msg);
 
 				if(sizeof(self::$connections)){
 
@@ -120,7 +120,7 @@
 				return $this->params["name"];
 			}
 
-			public function setLog(\apolloFramework\core\Logger &$log){
+			public function setLog(\apf\core\Logger &$log){
 
 				$log->setPrepend('['.__CLASS__.']');
 				$this->logger	=	$log;
@@ -178,7 +178,7 @@
 
 				if(is_null($this->logger)&&defined("LOG_SQL")){
 
-					$log	=	new \apolloFramework\core\Logger(NULL,FALSE);
+					$log	=	new \apf\core\Logger(NULL,FALSE);
 					$log->setEcho(TRUE);
 					$this->setLog($log);
 

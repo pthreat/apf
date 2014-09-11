@@ -1,8 +1,8 @@
 <?php
 
-	namespace apolloFramework\http\Adapter {
+	namespace apf\http\Adapter {
 
-		class Ecurl extends \apolloFramework\http\Adapter {
+		class Ecurl extends \apf\http\Adapter {
 
 			const			ADAPTER_NAME			=	"ECurl";
 			const			ADAPTER_VERSION		=	"1.0";
@@ -31,7 +31,7 @@
 
 			private		$_proxyHandler		=	NULL;		//Proxy object validator
 
-			public function __construct(\apolloFramework\parser\Uri $uri=NULL){
+			public function __construct(\apf\parser\Uri $uri=NULL){
 
 				if(!is_null($uri)){
 					$this->setUri($uri);
@@ -44,7 +44,7 @@
 
 			public function addRequestHeader($name=NULL,$value=NULL){
 
-				\apolloFramework\Validator::emptyString($name,"Header name must be set in order to add a header");
+				\apf\Validator::emptyString($name,"Header name must be set in order to add a header");
 
 				$this->_requestHeaders[]	=	"$name: $value";
 
@@ -149,7 +149,7 @@
 
 			}
 
-			public function setProxyHandler(\apolloFramework\http\ProxyHandler $proxyHandler){
+			public function setProxyHandler(\apf\http\ProxyHandler $proxyHandler){
 
 				$this->_proxyHandler	=	$proxyHandler;
 
@@ -650,7 +650,7 @@
 
 			}
 
-			public function save(\apolloFramework\core\File $file){
+			public function save(\apf\core\File $file){
 
 				try{
 

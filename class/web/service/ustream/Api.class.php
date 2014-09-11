@@ -2,14 +2,14 @@
 
 	/**
 	*Ustream API for PHP5 by Federico Stange
-	*for apolloFramework.
+	*for apf.
 	*
 	*Api doc: http://developer.ustream.tv/data_api/docs
 	*
 	*Code Example:
 	*
-	*$httpAdapter		=	new \apolloFramework\http\adapter\Ecurl();
-	*$ustream			=	new \apolloFramework\web\service\ustream\Api($httpAdapter);
+	*$httpAdapter		=	new \apf\http\adapter\Ecurl();
+	*$ustream			=	new \apf\web\service\ustream\Api($httpAdapter);
 	*$ustream->setFormat("json");
 	*$ustream->setKey(YOUR_API_KEY);
 	*$ustream->setSubjectId("pthreat");
@@ -17,9 +17,9 @@
 	*
 	*/
 
-	namespace apolloFramework\web\service\ustream{
+	namespace apf\web\service\ustream{
 
-		class Api extends \apolloFramework\web\Service{
+		class Api extends \apf\web\Service{
 
 			protected	$config			=	Array(
 														"baseUri"	=>	'http://api.ustream.tv',
@@ -39,7 +39,7 @@
 
 			private	$validFormats		=	Array("xml","json","html","php");
 
-			public function __construct(\apolloFramework\http\Adapter $adapter,Array $config=Array(),$parameters=Array()){
+			public function __construct(\apf\http\Adapter $adapter,Array $config=Array(),$parameters=Array()){
 
 				parent::__construct($adapter);
 
@@ -92,7 +92,7 @@
 
 				$uri	.=	'?key='.$this->getKey();
 
-				return new \apolloFramework\parser\Uri($uri);
+				return new \apf\parser\Uri($uri);
 
 			}
 

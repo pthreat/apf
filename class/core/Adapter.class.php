@@ -1,8 +1,8 @@
 <?php
 
-	namespace apolloFramework{
+	namespace apf{
 
-		abstract class Adapter implements \apolloFramework\AdapterInterface {
+		abstract class Adapter implements \apf\AdapterInterface {
 
 			public function getVersion(){
 

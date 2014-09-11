@@ -4,7 +4,7 @@
 	*MySQL query Builder class, this class is used to build SELECT SQL queries
 	*/
 
-	namespace db\mysql5{
+	namespace apf\db\mysql5{
 
 		class Select extends Query implements \ArrayAccess{
 
@@ -28,13 +28,17 @@
 			}
 
 			public function getCalcFoundRows(){
+
 				return $this->calcFoundRows;
+
 			}
 
 			public function getFoundRows(){
 
 				if(!$this->getCalcFoundRows()){
+
 					throw(new \Exception("To use this feature you must turn on the calcFoundRows")); 
+
 				}
 
 				$select	=	__CLASS__;
@@ -160,9 +164,14 @@
 
 			}
 
-			public function join(Join $join){
+			public function join($join,$type="INNER"){
 
+				$join		=	new Join($join);
+				$join->type($type);
+				$join->setSelect($this);
 				$this->sqlArray["join"][]	=	$join;
+
+				return $join;
 
 			}
 
@@ -364,13 +373,13 @@
 
 				if($this->result->num_rows==1&&$smart){
 
-					$result	=	new \db\mysql5\select\Result($this,$this->map);
+					$result	=	new \apf\db\mysql5\select\Result($this,$this->map);
 					$this->result	=	$result;
 					return $this->result->fetch();
 
 				}
 
-				$this->result	=	new \db\mysql5\select\Result($this,$this->map);
+				$this->result	=	new \apf\db\mysql5\select\Result($this,$this->map);
 				
 				return $this->result;
 

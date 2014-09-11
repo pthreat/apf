@@ -1,6 +1,6 @@
 <?php
 
-	namespace apolloFramework\web\core{
+	namespace apf\web\core{
 
 		class Dispatcher{
 
@@ -9,11 +9,10 @@
 			private	$_action				=	NULL;
 			private	$_debug				=	FALSE;
 			private	$_log					=	NULL;
-			private	$_config				=	NULL;
 			private	$_request			=	NULL;
 			private	$_map					=	NULL;
 
-			public function __construct(\apolloFramework\core\Config $config){
+			public function __construct(){
 
 				$msgError	=	"Error obteniendo peticion HTTP para interpretar modelo MVC, error en el .htaccess?".
 				"El archivo .htaccess en el raiz del directorio tiene que tener el siguiente formato:".
@@ -24,9 +23,6 @@
 				"RewriteCond %{REQUEST_FILENAME} !-f\n".
 				"RewriteCond %{REQUEST_FILENAME} !-d\n".
 				'RewriteRule ^(.*)$ index.php?request=$1 [L,QSA]'."\n";
-
-				$this->_config	=	$config;
-
 
 				if(empty($_GET["request"])||!isset($_GET["request"])){
 
@@ -47,30 +43,16 @@
 
 					$controlador	=	"index";
 					$accion			=	"index";
-
-				}else{
-
-					$controlador	=	preg_replace("/\W/",'',$request[0]);
-
-					if(isset($request[1])){
-
-						$accion	=	$request[1];
-
-					}else{
-
-						$accion	=	"index";
-
-					}
+					$this->setController($controlador);
+					$this->setAction($accion);
+					return;
 
 				}
 
+				$accion	=	isset($request[1])	?	$request[1]	:	"index";
 				$this->setController($controlador);
 				$this->setAction($accion);
-				$this->setConfig($config);
 
-			}
-
-			public function setLog(){
 			}
 
 			public function setDebug($bool=TRUE){
@@ -85,19 +67,9 @@
 
 			}
 
-			public function setControllerDir($directory=NULL){
-
-				if(!is_dir($directory)){
-
-					throw(new \Exception("Controller directory doesn't exists"));
-
-				}
-
-			}
-
 			public function setController($controlador){
 
-				$this->_controller			=	ucwords($controlador);
+				$this->_controller	=	ucwords(preg_replace("/\W/",'',$controlador));
 
 			}
 
@@ -119,12 +91,6 @@
 
 			}
 
-			public function setConfig(\apolloFramework\core\Config $config){
-
-				$this->_config	=	$config;
-
-			}
-
 			public function setControllerPath($path){
 
 				$this->_controllerPath	=	$path;
@@ -137,7 +103,13 @@
 
 			}
 
-			private function _parsePathRequest($request){
+			private function _parsePathRequest(Array $request){
+
+				if(!array_key_exists("request",$request)){
+
+					return new \stdClass();
+
+				}
 
 				$request	=	explode('/',$request["request"]);
 
@@ -180,14 +152,24 @@
 
 			}
 
-			private function _parseRequest(Array $request){
+			private function _parseRequest($request){
 
-				return arrayToObject($request);
+				if(!sizeof($request)){
+					return new \stdClass();
+				}
+
+				if(is_array($request)){
+
+					return (object)array_map(Array($this,__FUNCTION__),$request);
+
+				}
+
+				return $request;
 
 			}
 
 
-			public function map(\apolloFramework\web\Controller $controller,Array $map=Array()){
+			public function map(\apf\web\Controller $controller,Array $map=Array()){
 
 				if(!sizeof($map)){
 
@@ -275,70 +257,87 @@
 
 				$this->_map		=	$map;
 
-				$controllers	=	$this->_config->getSection("controllers");
-				$this->setControllerPath($controllers->path);
+				$config			=	\apf\core\Config::getSection("controller");
 
-				$controller						=	$this->_controller."Controller";
-				$archivoClaseControlador	=	"$controller.class.php";
+				if(!$config){
 
-				if(!file_exists($this->_controllerPath.DIRECTORY_SEPARATOR.$archivoClaseControlador)){
-
-					throw(new \Exception("El controlador $this->_controller  NO existe"));
+					throw(new \Exception("Controller section not found in configuration"));
 
 				}
 
-				require $this->_controllerPath.'/'.$archivoClaseControlador;
+				if(!isset($config->path)){
 
-				$claseControlador				=	'\\apolloFramework\\web\\'.$controller;
-				$objControlador				=	new $claseControlador;
-				$classMethods					=	get_class_methods($objControlador);
+					throw(new \Exception("Controller path not found in configuration"));
+
+				}
+
+				$controller			=	$this->_controller."Controller";
+				$controllerFile	=	"$controller.class.php";
+
+				if(!file_exists($config->path.DIRECTORY_SEPARATOR.$controllerFile)){
+
+					throw(new \Exception("Controller not found ".$this->_controller));
+
+				}
+
+				require $config->path.'/'.$controllerFile;
+
+				$loadedClases			=	get_declared_classes();
+				$controllerClass		=	"\\".array_pop($loadedClases);
+				$controllerInstance	=	new $controllerClass();
+
+				if(!is_a($controllerInstance,"\\apf\\web\\core\\Controller")){
+
+					throw(new \Exception("Controllers must extend to \\apf\\web\\core\\Controller"));
+
+				}
+
+				$classMethods	=	get_class_methods($controllerInstance);
 	
 				if(!in_array("__call",$classMethods)){
 
 					if(!in_array($this->_action,$classMethods)){
 
-						$this->_action	=	"index";
+						throw(new \Exception("Undefined action in controller ".$this->_controller));
 
 					}
 
 				}
 
 				$get		=	$this->_parsePathRequest($_GET);
-				$objControlador->setGet($get);
+				$controllerInstance->setGet($get);
 
 				$post		=	$this->_parseRequest($_POST);
-				$objControlador->setPost($post);
+				$controllerInstance->setPost($post);
 
 				$env	=	$this->_parseRequest($_ENV);
-				$objControlador->setEnv($env);
+				$controllerInstance->setEnv($env);
 
 				$cookie	=	$this->_parseRequest($_COOKIE);
-				$objControlador->setCookie($cookie);
+				$controllerInstance->setCookie($cookie);
 
 				if(isset($_SESSION)){
 
 					$session	=	$this->_parseRequest($_SESSION);
-					$objControlador->setSession($session);
+					$controllerInstance->setSession($session);
 
 				}
 
 				if(isset($_REQUEST)){
 
 					$request	=	$this->_parsePathRequest($_REQUEST);
-					$objControlador->setRequest($request);
+					$controllerInstance->setRequest($request);
 
 				}
 
 				$server	=	$this->_parseRequest($_SERVER);
-				$objControlador->setServer($server);
+				$controllerInstance->setServer($server);
 
 				$files	=	$this->_parseRequest($_FILES);
-				$objControlador->setFiles($files);
-				//unset($_FILES);
+				$controllerInstance->setFiles($files);
 
-				$objControlador->setName($this->_controller);
-				$objControlador->setAction($this->_action);
-				$objControlador->setConfig($this->_config);
+				$controllerInstance->setName($this->_controller);
+				$controllerInstance->setAction($this->_action);
 
 				if(sizeof($this->_map)&&isAdmin()){
 
@@ -346,7 +345,7 @@
 
 					if($controllerMap){
 
-						$this->map($objControlador,$controllerMap);
+						$this->map($controllerInstance,$controllerMap);
 						return;
 
 					}
@@ -354,7 +353,7 @@
 				}
 
 				$action	=	$this->_action;
-				$objControlador->$action();
+				$controllerInstance->$action();
 
 			}
 

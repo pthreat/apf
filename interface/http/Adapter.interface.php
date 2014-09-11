@@ -1,12 +1,12 @@
 <?php
 
-	namespace apolloFramework\http {
+	namespace apf\iface\http {
 
-		interface AdapterInterface extends \apolloFramework\AdapterInterface{
+		interface Adapter extends \apf\iface\Adapter{
 
 			public function setHttpMethod($method);
 			public function getHttpCode();
-			public function save(\apolloFramework\core\File $file);
+			public function save(\apf\core\File $file);
 			
 		}
 

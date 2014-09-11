@@ -1,6 +1,6 @@
 <?php
 
-	namespace db\mysql5\select{
+	namespace apf\db\mysql5\select{
 
 		class Result implements \Iterator,\ArrayAccess{
 
@@ -10,7 +10,7 @@
 			private	$position	=	NULL;
 			private	$map			=	NULL;
 
-			public function __construct(\db\mysql5\Select $select,$map=NULL){
+			public function __construct(\apf\db\mysql5\Select $select,$map=NULL){
 
 				$this->select	=	$select;
 				$this->result	=	$select->getQueryResult();

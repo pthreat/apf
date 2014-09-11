@@ -4,34 +4,19 @@
 	*MySQL query Builder class, this class is used to build SELECT SQL queries
 	*/
 
-	namespace db\mysql5{
+	namespace apf\db\mysql5{
 
 		class Join extends Query{
 
-			private	$sqlArray	=	Array(
-														"on"=>NULL,
+			private		$select		=	NULL;
+			protected	$sqlArray	=	Array(
+														"on"	=>NULL,
 														"type"=>NULL,
-														"having"=>Array(),
-														"group"=>Array()
 			);
 
-			//This is just an accesory method for you being able to wrap a certain value
+			public function setSelect(\apf\db\mysql5\Select $select){
 
-			public function group(Array $group){
-
-				$this->sqlArray["group"] = $group;
-
-			}
-
-			public function toOutFile($file){
-
-				$this->sqlArray["outfile"]	=	$file;
-
-			}
-
-			public function join(Join $join){
-
-				$this->sqlArray["join"][]	=	$join;
+				$this->select	=	$select;
 
 			}
 
@@ -45,6 +30,7 @@
 					case "LEFT":
 					case "OUTTER":
 					case "CROSS":
+					case "NATURAL":
 						$this->sqlArray["type"]	=	$type;
 					break;
 
@@ -56,7 +42,14 @@
 
 			}
 
-			public function on(Array $conditions){
+			public function on($conditions){
+
+				if(is_string($conditions)){
+			
+					$this->sqlArray["on"].=	$this->adapter->real_escape_string($conditions);
+					return $this->select;
+
+				}
 
 				foreach($conditions as $key=>$value){
 
@@ -121,30 +114,6 @@
 
 			}
 
-			public function orderBy(Array $fields,$sort=NULL){
-
-				if(empty($sort)){
-
-					$sort	=	"ASC";
-
-				}
-
-				$this->sqlArray["order"]=Array("fields"=>$fields,"sort"=>$sort);
-
-			}
-
-			public function union(Select $select){
-
-				$this->sqlArray["union"]	=	$select;
-
-			}
-
-			public function limit(Array $limit){
-
-				$this->sqlArray["limit"]	=	$limit;
-
-			}
-
 			public function execute($smart=TRUE,$asObject=TRUE){
 
 				throw(new \Exception("Can't call execute on a join object"));
@@ -154,9 +123,7 @@
 			public function getSQL(){
 
 				$s			=	$this->space;
-
 				$table	=	$this->table->getName();
-
 				$on		=	$this->sqlArray["on"];
 
 				$sql	=	$this->sqlArray["type"].$s."JOIN".$s.$table.$s."ON".$s.'('.$on.')';
@@ -165,11 +132,7 @@
 
 			}
 
-			public function getResult(\MySQLi_Result $result){
-
-				return $result;
-
-			}
+			public function getResult(){}
 
 		}
 

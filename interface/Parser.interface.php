@@ -1,8 +1,8 @@
 <?php
 
-namespace apolloFramework\parser {
+namespace apf\iface {
 
-	interface ParserInterface{
+	interface Parser{
 
 		public function parse($content);
 

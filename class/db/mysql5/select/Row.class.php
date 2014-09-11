@@ -1,13 +1,13 @@
 <?php
 
-	namespace db\mysql5\select{
+	namespace apf\db\mysql5\select{
 
 		class Row implements \ArrayAccess{
 
 			private	$data		=	NULL;
 			private	$table	=	NULL;
 	
-			public function __construct(Array &$data,\db\mysql5\Table $table=NULL){
+			public function __construct(Array &$data,\apf\db\mysql5\Table $table=NULL){
 
 				$this->table	=	$table;
 				$this->data		=	$data;
@@ -33,7 +33,7 @@
 
 			public function update(Array $where=Array()){
 
-				$update	=	new \db\mysql5\Update($this->table);
+				$update	=	new \apf\db\mysql5\Update($this->table);
 
 				foreach($this->data as $key=>$value){
 
@@ -47,7 +47,7 @@
 
 			public function replace(){
 
-				$replace	=	new \db\mysql5\Replace($this->table);
+				$replace	=	new \apf\db\mysql5\Replace($this->table);
 
 				foreach($this->data as $key=>$value){
 
@@ -61,7 +61,7 @@
 			
 			public function insert(){
 
-				$insert	=	new \db\mysql5\Insert($this->table);
+				$insert	=	new \apf\db\mysql5\Insert($this->table);
 
 				foreach($this->data as $key=>$value){
 

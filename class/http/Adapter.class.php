@@ -1,10 +1,10 @@
 <?php
 
-	namespace apolloFramework\http{
+	namespace apf\http{
 
-		abstract class Adapter extends \apolloFramework\Adapter implements \apolloFramework\http\AdapterInterface{
+		abstract class Adapter extends \apf\Adapter implements \apf\http\AdapterInterface{
 
-			protected	$_uri						=	NULL;		//\apolloFramework\parser\Uri Object
+			protected	$_uri						=	NULL;		//\apf\parser\Uri Object
 			protected	$_httpMethod			=	"GET";	
 			protected	$_config					=	Array();
 			protected	$_logger					=	NULL;
@@ -25,7 +25,7 @@
 
 			}
 
-			public function setLog(\apolloFramework\core\Logger &$log){
+			public function setLog(\apf\core\Logger &$log){
 
 				$this->_logger=$log;
 
@@ -35,7 +35,7 @@
 				$this->_config	=	$config;
 			}
 
-			public function setUri(\apolloFramework\parser\Uri $uri=NULL){
+			public function setUri(\apf\parser\Uri $uri=NULL){
 
 				if(sizeof($this->_config) && $this->_config["verbose"]==2){
 					$this->log("Normalized URI: ".$uri,0,"white");

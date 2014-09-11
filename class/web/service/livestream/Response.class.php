@@ -1,6 +1,6 @@
 <?php
 
-	namespace apolloFramework\web\service\livestream{
+	namespace apf\web\service\livestream{
 
 		class Response{
 

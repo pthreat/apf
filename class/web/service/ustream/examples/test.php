@@ -18,8 +18,8 @@
 	require "Api.class.php";
 	require "Response.class.php";
 
-	$httpAdapter	=	new \apolloFramework\http\adapter\Ecurl();
-	$ustream			=	new \apolloFramework\web\service\ustream\Api($httpAdapter);
+	$httpAdapter	=	new \apf\http\adapter\Ecurl();
+	$ustream			=	new \apf\web\service\ustream\Api($httpAdapter);
 	$ustream->setFormat("json");
 	$ustream->setKey("2040345AD71816CA54680529F492827D");
 	$ustream->setSubjectId("phpancho");

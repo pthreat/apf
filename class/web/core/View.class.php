@@ -1,17 +1,17 @@
 <?php
 
-	namespace apolloFramework\web{
+	namespace apf\web\core{
 
 	   class View{
 
-			private	$_templates	=	Array();
-			private	$_vars		=	Array();
-			private	$_config		=	NULL;
-			private	$_messages	=	NULL;
+			private	static	$header	=	NULL;
+			private	$_templates			=	Array();
+			private	$_vars				=	Array();
+			private	$_messages			=	NULL;
+			private	$_singleTplPath	=	NULL;
+			private	static	$footer	=	NULL;
 
-			public function __construct(\apolloFramework\core\Config $config,$templates=NULL){
-
-				$this->setConfig($config);
+			public function __construct($templates=NULL){
 
 				if(is_null($templates)){
 
@@ -34,25 +34,41 @@
 
 			}
 
-			public function setConfig(\apolloFramework\core\Config $config){
+			public function addTemplate($template=NULL,$first=NULL){
 
-				$this->_config	=	$config;
+				\apf\Validator::emptyString($template,"Template to be added can't be empty");
+
+				$config	=	\apf\core\Config::getSection("view");
+				$this->validateConfig($config);
+
+				$path			=	$config->template_path;
+				$ext			=	trim($config->template_extension,'.');
+				$template	=	strpos($template,".$ext")	?	$template	:	$template.".$ext";
+				$this->_templates[]	=	new \apf\core\File($path.DIRECTORY_SEPARATOR.$template);
+
+				return TRUE;
 
 			}
 
-			public function addTemplate($template){
+			private function validateConfig($config){
 
-				if(empty($template)){
+				if(empty($config)){
 
-					return FALSE;
+					throw(new \Exception("Can't find view section in configuration"));
 
 				}
 
-				$path						=	$this->_config->getSection("templates");
-				$path						=	$path->path;
-				$this->_templates[]	=	new \apolloFramework\core\File($path.DIRECTORY_SEPARATOR.$template);
+				if(empty($config->template_path)){
 
-				return TRUE;
+					throw(new \Exception("Can't find template_path in configuration"));
+
+				}
+
+				if(empty($config->template_extension)){
+
+					throw(new \Exception("Can't find template_extension in configuration"));
+
+				}
 
 			}
 
@@ -63,6 +79,21 @@
 					$this->addTemplate($template);
 
 				}
+
+
+			}
+
+			public static function setHeader($template){
+				self::$header	=	$template;
+			}
+
+			public static function setFooter($template){
+				self::$footer	=	$template;
+			}
+
+			public function addFirst($template){
+
+
 
 			}
 
@@ -77,6 +108,40 @@
 				 $this->$name=$value;
 
 		   }
+
+			private function load($base=NULL,$tpl=NULL){
+
+				\apf\Validator::emptyString($base);
+
+				try{
+
+					$config	=	\apf\core\Config::getSection("view");
+					$this->validateConfig($config);
+
+					$ext		=	$config->template_extension;
+
+					if(is_null($tpl)){
+
+						$tpl	=	new \apf\core\File($this->_singleTplPath.DIRECTORY_SEPARATOR.$base.".$ext");
+						require $tpl;
+						return;
+
+					}
+
+					$tpl		=	preg_replace("/\W/",'',$tpl);
+					$path		=	$config->template_path.DIRECTORY_SEPARATOR.$base;
+					$tpl		=	$path.DIRECTORY_SEPARATOR."$tpl.$ext";
+					$tpl		=	new \apf\core\File($tpl);
+
+					require $tpl;
+
+				}catch(\Exception $e){
+
+					throw(new \Exception("Template $tpl not found in: ".$this->_singleTplPath));
+
+				}
+
+			}
 
 			public function setVarArray(Array &$values){
 
@@ -105,87 +170,13 @@
 
 				ob_start();
 
-				foreach($this->_templates as $template){
-
-					require $template;
-
-				}
+				$this->render();
 
 				$content	=	ob_get_contents();
 
 				ob_end_clean();
 
 				return $content;
-			}
-
-			public function setMessages(Array $messages=Array()){
-
-				if(!sizeof($messages)){
-
-					return;
-
-				}
-
-				$requiredKeys	=	Array("msg","status");
-
-				foreach($messages as &$message){
-
-					\apolloFramework\Validator::arrayKeys($requiredKeys,$message);
-
-					$this->addMessage($message["msg"],$message["status"]);
-
-				}
-
-			}
-
-			public function addMessage($message,$status="error"){
-
-				switch($status){
-
-					case "success":
-					case "error":
-					break;
-
-					default:
-						throw(new \Exception("Unknown message status \"$status\""));
-					break;
-
-				}
-
-				$this->_messages[]	=	Array("msg"=>$message,"status"=>$status);
-
-			}
-
-			public function getMessages(){
-
-				return $this->_messages;
-
-			}
-
-			public function getMessagesAsHtml($template=NULL){
-
-				if(!sizeof($this->_messages)){
-					return;
-				}
-
-				if(!is_null($template)){
-
-					$view=new View($this->_config);
-					$view->addTemplate($template);
-					$view->addVar("messages",$messages);
-					return $view->renderAsString();
-
-				}
-
-				$str	=	'<div class="apfw msglist">';
-
-				foreach($this->_messages as $msg){
-					$str.='<div class="'.$msg["status"].'">'.$msg["msg"].'</div>';		
-				}
-
-				$str	.=	'</div>';
-
-				return $str;
 
 			}
 
@@ -198,12 +189,27 @@
 
 				}
 
+				if(self::$header){
+
+					$this->addTemplate(self::$header);
+
+				}
 
 				foreach($this->_templates as $template){
 
-					require $template;
+					$this->_singleTplPath	=	dirname($template);
+					$this->load($template);
 
 				}
+
+				if(self::$footer){
+
+					$this->addTemplate(self::$footer);
+					$this->load(array_pop($this->_templates));
+
+				}
+
+				$this->_singleTplPath	=	NULL;
 
 
 			}

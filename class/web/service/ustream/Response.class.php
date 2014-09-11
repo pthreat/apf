@@ -1,6 +1,6 @@
 <?php
 
-	namespace apolloFramework\web\service\ustream{
+	namespace apf\web\service\ustream{
 
 
 		class Response{

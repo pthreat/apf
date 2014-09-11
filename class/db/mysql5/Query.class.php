@@ -1,12 +1,12 @@
 <?php
 
-	namespace db\mysql5{
+	namespace apf\db\mysql5{
 
 			abstract class Query{
 
 				protected	$table						=	NULL;
-				protected	$fieldDelimiter				=	',';
-				protected	$fieldEqualityChar			=	'=';
+				protected	$fieldDelimiter			=	',';
+				protected	$fieldEqualityChar		=	'=';
 				protected	$space						=	" ";
 				protected	$commentOpen				=	"/*";
 				protected	$commentClose				=	"*/";
@@ -15,31 +15,34 @@
 				protected	$params						=	NULL;
 				protected	$error						=	NULL;
 				protected	$adapter		   			=	NULL;
-
-
 				protected   $sqlArray               =	Array(
-															 "fields"=>Array(),
-															 "where"=>NULL,
-															 "having"=>Array(),
-															 "group"=>Array(),
-															 "order"=>Array(),
-															 "limit"=>Array(),
-															 "offset"=>NULL,
-															 "union"=>NULL,
-															 "join"=>Array()
+																			 "fields"=>Array(),
+																			 "where"=>NULL,
+																			 "having"=>Array(),
+																			 "group"=>Array(),
+																			 "order"=>Array(),
+																			 "limit"=>Array(),
+																			 "offset"=>NULL,
+																			 "union"=>NULL,
+																			 "join"=>Array()
 				);
+
+				private static $instanceCount	=	0;
 
 				abstract public function getResult();
 				abstract public function getSQL();
 
 				public function __construct($table=NULL,$params=NULL){
 
+					self::$instanceCount++;
 					$this->adapter	=	Adapter::getInstance($params);
 					$this->params	=	$params;
 
 					if(is_string($table)){
 
-						return $this->setTable(new Table($table));
+						$table	=	new Table($table);
+						$table->setAlias("t".self::$instanceCount);
+						$this->setTable($table);
 
 					}elseif(!is_null($table)){
 
@@ -49,7 +52,27 @@
 
 				}
 
-				public function where(Array $conditions){
+				public function where($conditions){
+
+					if(is_string($conditions)){
+
+						$conditions	=	explode("=",$conditions);
+
+						foreach($conditions as $key=>&$condition){
+
+							$condition	=	$this->adapter->real_escape_string($condition);
+
+							if($key%2){
+								$condition="'$condition'";
+							}
+
+						}
+
+						$this->sqlArray["where"].=	implode('=',$conditions);
+
+						return $this;
+
+					}
 
 					foreach($conditions as $key=>$value){
 
@@ -146,7 +169,7 @@
 
 									}else{
 
-										if(!is_a($value["value"],"\\db\\mysql5\\Select")){
+										if(!is_a($value["value"],"\\apf\\db\\mysql5\\Select")){
 
 											throw(new \Exception("El valor, cuando se utiliza IN o NOT IN, tiene que ser un Array o un objeto de tipo Select"));
 										
@@ -275,6 +298,8 @@
 				
 				public function execute($smart=TRUE){
 
+					self::$instanceCount	=	0;
+
 					$sql		=	sprintf("%s",$this);
 
 					if($this->error){
@@ -287,7 +312,7 @@
 
 					if(defined("LOG_SQL")||$this->adapter->getVerbose()){
 
-						$log	=	new \apolloFramework\core\Logger();
+						$log	=	new \apf\core\Logger();
 						$log->setEcho(TRUE);
 						$log->log($sql,0,$this->adapter->getQueryColor());
 
@@ -385,7 +410,7 @@
 
 				}
 
-				public function join(Join $join){
+				public function join($join,$type=NULL){
 
 					$this->sqlArray["join"][]	=	$join;
 

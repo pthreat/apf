@@ -1,8 +1,8 @@
 <?php
 
-	namespace apolloFramework\db {
+	namespace apf\iface\db {
 
-		interface AdapterInterface extends \apolloFramework\AdapterInterface {
+		interface Adapter extends \apf\iface\Adapter {
 			public function setDatabaseName($name);
 			public function setPort($port);
 		}

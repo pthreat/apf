@@ -1,29 +1,28 @@
 <?php
 
-	namespace apolloFramework\web{
+	namespace apf\web\core{
 
-		class Controller{
+		abstract class Controller{
 
-			protected	$_get				=	NULL;
-			protected	$_post			=	NULL;
-			protected	$_session		=	NULL;
-			protected	$_request		=	NULL;
-			protected	$_files			=	NULL;
-			protected	$_env				=	NULL;
-			protected	$_cookie			=	NULL;
-			protected	$_name			=	NULL;
-			protected	$_controller	=	NULL;
-			protected	$_action			=	NULL;
-			protected	$_config			=	NULL;
-			protected	$_js				=	Array();
-			protected	$_css				=	Array();
-			protected	$_raw				=	Array();
+			protected	$get			=	NULL;
+			protected	$post			=	NULL;
+			protected	$session		=	NULL;
+			protected	$request		=	NULL;
+			protected	$files		=	NULL;
+			protected	$env			=	NULL;
+			protected	$cookie		=	NULL;
+			protected	$name			=	NULL;
+			protected	$controller	=	NULL;
+			protected	$action		=	NULL;
+			protected	$js			=	Array();
+			protected	$css			=	Array();
+			protected	$raw			=	Array();
 
-			public function __construct(){
+			public function construct(){
 				
-				$controller				=	substr(get_class($this),strlen(__NAMESPACE__)+1);
+				$controller				=	substr(getclass($this),strlen(NAMESPACE)+1);
 				$controller				=	strtolower(substr($controller,0,strpos($controller,"Controller")));
-				$this->_controller	=	$controller;
+				$this->controller		=	$controller;
 
 			}
 
@@ -31,35 +30,25 @@
 
 			public function getViewInstance(Array $templates=Array()){
 
-				$view			=	new View($this->_config,$templates);
+				$view			=	new View($templates);
 
-				$controller	=	get_class($this);
+				$controller	=	getclass($this);
 				$controller	=	substr($controller,strrpos($controller,"\\")+1);
 				$controller	=	substr($controller,0,strpos($controller,"Controller"));
 
-				$view->setVar("_controller",$controller);
-				$view->setVar("_action",$this->_action);
-				$view->setVar("_get",$this->_get);
-				$view->setVar("_post",$this->_post);
-				$view->setVar("_session",$this->_session);
-				$view->setVar("_files",$this->_files);
-				$view->setVar("_env",$this->_env);
-				$view->setVar("_cookie",$this->_cookie);
+				$view->setVar("controller",$controller);
+				$view->setVar("action",$this->action);
+				$view->setVar("get",$this->get);
+				$view->setVar("post",$this->post);
+				$view->setVar("session",$this->session);
+				$view->setVar("files",$this->files);
+				$view->setVar("env",$this->env);
+				$view->setVar("cookie",$this->cookie);
 
 				//Additional files
-				$view->setVar("_js",$this->_js);
-				$view->setVar("_css",$this->_css);
-				$view->setVar("_raw",$this->_raw);
-
-				foreach($this->_config as $section=>$values){
-
-					if($section=="database"){
-						continue;
-					}
-
-					$view->setVar($section,$values);
-
-				}
+				$view->setVar("js",$this->js);
+				$view->setVar("css",$this->css);
+				$view->setVar("raw",$this->raw);
 
 				return $view;
 
@@ -67,68 +56,62 @@
 
 			public function setName($name){
 
-				$this->_name	=	$name;
+				$this->name	=	$name;
 
 			}
 
 			public function setAction($action){
 
-				$this->_action	=	$action;
+				$this->action	=	$action;
 
 			}
 
 			public function setGet(\stdClass $get){
 
-				$this->_get	=	$get;
+				$this->get	=	$get;
 
 			}
 
 			public function setCookie(\stdClass $cookie){
 
-				$this->_cookie	=	$cookie;
+				$this->cookie	=	$cookie;
 
 			}
 
 
 			public function setPost(\stdClass $post){
 
-				$this->_post	=	$post;
+				$this->post	=	$post;
 
 			}
 
 			public function setEnv(\stdClass $env){
 
-				$this->_env	=	$env;
+				$this->env	=	$env;
 
 			}
 
 			public function setSession(\stdClass $session){
 
-				$this->_session	=	$session;
+				$this->session	=	$session;
 
 			}
 
 			public function setRequest(\stdClass $request){
 
-				$this->_request	=	$request;
+				$this->request	=	$request;
 
 			}
 
 			public function setFiles(\stdClass $files){
 
-				$this->_files	=	$files;
+				$this->files	=	$files;
 
 			}
 
 			public function setServer(\stdClass $server){
 
-				$this->_server	=	$server;
-
-			}
-
-			public function setConfig(\apolloFramework\core\Config $config){
-
-				$this->_config	=	$config;
+				$this->server	=	$server;
 
 			}
 

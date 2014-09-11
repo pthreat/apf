@@ -32,7 +32,7 @@
 			private	$_validResponseFormats	=	Array("json","rest","soap","xmlrpc");
 			private	$_lastCalledMethod		=	NULL;
 
-			public function __construct(\apolloFramework\http\Adapter $adapter=NULL,Array $config = Array()){
+			public function __construct(\apf\http\Adapter $adapter=NULL,Array $config = Array()){
 
 				if(!is_null($adapter)){
 
@@ -92,7 +92,7 @@
 			}
 
 
-			public function setHttpAdapter(\apolloFramework\http\Adapter $adapter){
+			public function setHttpAdapter(\apf\http\Adapter $adapter){
 
 				$this->_adapter	=	$adapter;
 
@@ -168,7 +168,7 @@
 
 				}
 
-				$uri	=	new \apolloFramework\parser\Uri($this->_config["rest_endpoint"]);
+				$uri	=	new \apf\parser\Uri($this->_config["rest_endpoint"]);
 				$uri->addRequestVariables($args);
 				$this->_adapter->setUri($uri);
 				$this->_adapter->setHttpMethod("GET");
@@ -208,7 +208,7 @@
 
 				$args['api_sig'] = $this->signArgs($args);
 
-				$uri	=	new \apolloFramework\parser\Uri($this->_config["auth_endpoint"]);
+				$uri	=	new \apf\parser\Uri($this->_config["auth_endpoint"]);
 				$uri->addRequestVariables($args);
 				return $uri;
 
@@ -243,7 +243,7 @@
 
 				$uri	=	"http://farm$args[farm].staticflickr.com/$args[server]/$args[id]_$args[secret]_$size".$ext;
 
-				return new \apolloFramework\parser\Uri($uri);
+				return new \apf\parser\Uri($uri);
 
 			}
 

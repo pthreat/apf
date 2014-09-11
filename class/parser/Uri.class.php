@@ -1,6 +1,6 @@
 <?php
 
-	namespace apolloFramework\parser {
+	namespace apf\parser {
 
 		class Uri {
 
@@ -402,7 +402,7 @@
 
 			public function getHostAsObject(){
 
-				$host	=	new \apolloFramework\net\Host();
+				$host	=	new \apf\net\Host();
 
 				$host->setHost($this->_uri["host"]);
 

@@ -4,7 +4,7 @@
 	*MySQL query Builder class, this class is used to build SELECT SQL queries
 	*/
 
-	namespace db\mysql5{
+	namespace apf\db\mysql5{
 
 		class Delete extends Query{
 

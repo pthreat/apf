@@ -39,7 +39,7 @@
 	 * The reCAPTCHA server URL's
 	 */
 
-	namespace apolloFramework\web\captcha{
+	namespace apf\web\captcha{
 
 		class Recaptcha{
 

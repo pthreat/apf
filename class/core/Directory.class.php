@@ -1,6 +1,6 @@
 <?php
 
-	namespace apolloFramework\core{
+	namespace apf\core{
 
 		class Directory{
 

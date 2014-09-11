@@ -1,6 +1,6 @@
 <?php
 
-	namespace apolloFramework\core {
+	namespace apf\core {
 
 		class File implements \Iterator{
 
@@ -97,7 +97,7 @@
 
 			public function setReadFunction($fName=NULL){
 
-				$fName	=	\apolloFramework\Validator::emptyString($fName);
+				$fName	=	\apf\Validator::emptyString($fName);
 
 				if(!function_exists($fName)){
 

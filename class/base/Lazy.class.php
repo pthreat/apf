@@ -1,6 +1,6 @@
 <?php
 
-	namespace apolloFramework\base{
+	namespace apf\base{
 
 		abstract class Lazy{
 
@@ -68,7 +68,7 @@
 
 					if($isCallingSetterOrGetter=="set"){
 
-						return $this->lazyData[$arg] = \apolloFramework\Validator::metaValidate($args[0],$this->data[$arg]);
+						return $this->lazyData[$arg] = \apf\Validator::metaValidate($args[0],$this->data[$arg]);
 
 					}
 
@@ -86,7 +86,7 @@
 
 					if(isset($args[0])){
 
-						return \apolloFramework\Validator::metaValidate($this->lazyData[$arg],$this->data[$arg]);
+						return \apf\Validator::metaValidate($this->lazyData[$arg],$this->data[$arg]);
 
 					}
 

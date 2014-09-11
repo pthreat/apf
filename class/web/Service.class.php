@@ -1,6 +1,6 @@
 <?php
 
-	namespace apolloFramework\web{
+	namespace apf\web{
 
 		abstract class Service{
 
@@ -11,7 +11,7 @@
 			protected	$format				=	NULL;
 			protected	$config				=	NULL;
 
-			public function __construct(\apolloFramework\http\Adapter $adapter=NULL,\apolloFramework\core\Config $config=NULL){
+			public function __construct(\apf\http\Adapter $adapter=NULL,\apf\core\Config $config=NULL){
 
 				if(!is_null($adapter)){
 
@@ -27,7 +27,7 @@
 
 			}
 
-			public function setAdapter(\apolloFramework\http\Adapter $adapter){
+			public function setAdapter(\apf\http\Adapter $adapter){
 
 				$this->adapter	=	$adapter;
 
@@ -39,7 +39,7 @@
 
 			}
 
-			public function setUri(\apolloFramework\parser\Uri $uri){
+			public function setUri(\apf\parser\Uri $uri){
 
 				$this->uri	=	$uri;
 
@@ -52,7 +52,7 @@
 			}
 
 
-			public function setConfig(\apolloFramework\core\Config $config){
+			public function setConfig(\apf\core\Config $config){
 
 				$class	=	strtolower(get_class($this));
 
