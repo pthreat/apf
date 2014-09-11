@@ -90,7 +90,7 @@
 					default:
 						$file		=	self::$frameworkDir.DIRECTORY_SEPARATOR.
 										"class".DIRECTORY_SEPARATOR.
-										$class.".$path.php";
+										$class.".class.php";
 					break;
 
 
