@@ -86,6 +86,14 @@
 									$class.".interface.php";
 					break;
 
+					case "trait":
+
+						$file		=	self::$frameworkDir.DIRECTORY_SEPARATOR.
+										"trait".DIRECTORY_SEPARATOR.
+										$class.".trait.php";
+						
+					break;
+
 					case "class":
 					default:
 						$file		=	self::$frameworkDir.DIRECTORY_SEPARATOR.
