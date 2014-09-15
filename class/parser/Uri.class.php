@@ -400,23 +400,6 @@
 
 			}
 
-			public function getHostAsObject(){
-
-				$host	=	new \apf\net\Host();
-
-				$host->setHost($this->_uri["host"]);
-
-				if(!empty($this->_uri["port"])){	
-
-					$host->setPort($this->_uri["port"]);
-	
-				}
-
-	
-				return $host;
-
-			}
-
 			public function getPath(){
 
 				return $this->_uri["path"];

@@ -69,6 +69,7 @@
 
 				}
 
+
 				$class	=	trim(substr($class,strpos($class,"\\")+1));
 				$path		=	explode("\\",$class);
 				$class	=	implode('/',$path);
@@ -81,18 +82,28 @@
 					break;
 
 					case "iface":
-						$file	=	self::$frameworkDir.DIRECTORY_SEPARATOR.
-									"interface".DIRECTORY_SEPARATOR.
-									$class.".interface.php";
-					break;
 
-					case "trait":
+						unset($path[0]);
+
+						$class	=	implode('/',$path);
 
 						$file		=	self::$frameworkDir.DIRECTORY_SEPARATOR.
-										"trait".DIRECTORY_SEPARATOR.
+										"interface".DIRECTORY_SEPARATOR.
+										$class.".interface.php";
+					break;
+
+					case "traits":
+
+						$path[0]	=	"trait";
+
+
+						$class	=	implode('/',$path);
+
+						$file		=	self::$frameworkDir.DIRECTORY_SEPARATOR.
 										$class.".trait.php";
 						
 					break;
+
 
 					case "class":
 					default:
@@ -116,7 +127,7 @@
 			}
 
 
-			public static function init($cfgFile,Array $classMap=Array(),$appClassDir=NULL){
+			public static function init($cfgFile=NULL,Array $classMap=Array(),$appClassDir=NULL){
 
 				spl_autoload_register(__CLASS__."::autoLoad");
 
@@ -144,14 +155,51 @@
 
 				}
 
-				//Initialize configuration class
-				\apf\core\Config::fromIniFile(new \apf\core\File($cfgFile));
+				if(!is_null($cfgFile)){
 
-				$dbConfig		=	\apf\core\Config::getSection("database");
+					if(!is_array($cfgFile)){
 
-				if($dbConfig){
+						$cfgFile	=	Array($cfgFile);
 
-					$db	=	\apf\db\mysql5\Adapter::getInstance($dbConfig);
+					}
+
+					foreach($cfgFile as $config){
+
+
+						//Initialize configuration class
+						\apf\core\Config::fromIniFile(new \apf\core\File($config));
+
+						$dbConfig		=	\apf\core\Config::getSectionsLike("database");
+
+						if($dbConfig){
+
+							foreach($dbConfig as $dbName=>$data){
+
+								$data->id	=	(isset($data->id))	?	$data->id	:	$dbName;
+
+								//Do NOT connect unless it's required
+								//In this fashion we just add a connection
+								//but we do NOT connect unless we are required to do so, we just 
+								//add the connection data.
+
+								try{
+
+									$connectionData	=	\apf\type\db\Connection::create($data);
+
+								}catch(\Exception $e){
+
+									throw new \Exception("Error in config file $config, section $dbName: ".$e->getMessage());
+
+								}
+
+								
+								$db	=	\apf\db\Adapter::addConnection($connectionData);
+
+							}
+
+						}
+
+					}
 
 				}
 

@@ -4,23 +4,27 @@
 
 		class Validator{
 
-			public static function arrayKeys(Array $requiredKeys,Array $array){
+			public static function arrayKeys(Array $requiredKeys,Array &$array,$throw=TRUE){
 
-				foreach($requiredKeys as &$k){
+				foreach($requiredKeys as $k){
 
 					if(!array_key_exists($k,$array)){
 
-						if(empty($msg)){
+						if($throw){
 
 							$msg	=	"Required array key $k, doesn't exists in given array";
+							throw(new \Exception($msg));
 
 						}
 
-						throw(new \Exception($msg));
+						return $k;
+
 
 					}
 
 				}
+
+				return TRUE;
 					
 			}
 
@@ -39,6 +43,28 @@
 				}
 
 				return $string;
+
+			}
+
+			public static function ip($ip=NULL){
+
+				$validIpv4	=	filter_var($ip,FILTER_VALIDATE_IP,FILTER_FLAG_IPV4);
+
+				if($validIpv4){
+
+					return TRUE;
+
+				}
+
+				$validIpv6	=	filter_var($ip,FILTER_VALIDATE_IP,FILTER_FLAG_IPV6);
+
+				if($validIpv6){
+
+					return TRUE;
+
+				}
+
+				throw(new \Exception("Invalid IP address"));
 
 			}
 
@@ -317,7 +343,7 @@
 
 			}
 
-			public static function metaValidate($value,Array $filter=Array()){
+			public static function metaValidate(&$value,Array $filter=Array()){
 
 				if(!sizeof($filter)){
 

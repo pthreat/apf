@@ -77,6 +77,32 @@
 
 			}
 
+			public function getSectionsLike($like=NULL){
+
+				$like	=	trim($like,'/');
+
+				\apf\Validator::emptyString($like,"Expecting regex");
+
+				$like			=	preg_quote($like,'/');
+				$like			=	"/$like/";
+				$sections	=	get_object_vars($this);
+
+				$return		=	Array();
+
+				foreach($sections as $name=>$values){
+
+					if(preg_match($like,$name)){
+
+						$return[$name]	=	$values;
+
+					}
+
+				}
+
+				return $return;
+
+			}
+
 		}
 
 	}

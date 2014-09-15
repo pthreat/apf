@@ -1,8 +1,8 @@
 <?php
 
-	namespace apf{
+	namespace apf\core{
 
-		abstract class Adapter implements \apf\AdapterInterface {
+		abstract class Adapter implements \apf\iface\Adapter{
 
 			public function getVersion(){
 

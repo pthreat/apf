@@ -1,6 +1,6 @@
 <?php
 
-	namespace apf\pattern{
+	namespace apf\traits\pattern{
 
 		trait Singleton{
 

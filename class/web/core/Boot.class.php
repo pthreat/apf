@@ -4,7 +4,7 @@
 
 		class Boot extends \apf\core\Boot{
 
-			public static function init($cfgFile,Array $classMap=Array(),$appClassDir=NULL){
+			public static function init($cfgFile=NULL,Array $classMap=Array(),$appClassDir=NULL){
 
 				parent::init($cfgFile,$classMap,$appClassDir);
 
