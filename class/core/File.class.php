@@ -12,19 +12,21 @@
 			private	$fetchTimes	=	NULL;
 			private	$readFn		=	"fread";
 
-			public function __construct($file=NULL){
+			public function __construct($file=NULL,$checkExistence=TRUE){
 
-				if(!is_null($file)){
+				if(is_null($file)){
 
-					if(!file_exists($file)){
-
-						throw (new \Exception ("File $file not found!"));
-
-					}
-
-					$this->setFilename($file);
+					return;
 
 				}
+
+				if($checkExistence&&!file_exists($file)){
+
+					throw (new \Exception ("File $file not found!"));
+
+				}
+
+				$this->setFilename($file);
 
 			}
 
@@ -98,6 +100,18 @@
 				}
 
 				return $this->fp;
+
+			}
+
+			public function write($content,$mode="a+"){
+
+				if(is_null($this->fp)){
+
+					$this->open($mode);
+
+				}
+
+				return fwrite($this->fp,$content,strlen($content));
 
 			}
 
@@ -190,26 +204,6 @@
 			public function delete(){
 
 				return unlink($this->dirname.DIRECTORY_SEPARATOR.$this->file);
-
-			}
-
-			public function write(){
-
-				file_put_contents($this->dirname.DIRECTORY_SEPARATOR.$this->file,$this->contents);
-
-			}
-
-			public function isUsable(){
-
-				$file	=	$this->getFile();
-
-				if(!is_readable($file)){
-					throw(new \Exception("File $file is not readable, please check your permissions!"));
-				}
-
-				if(!is_file($file)){
-					throw(new \Exception("File $file is a directory!"));
-				}
 
 			}
 

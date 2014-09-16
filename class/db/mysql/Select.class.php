@@ -4,15 +4,18 @@
 	*MySQL query Builder class, this class is used to build SELECT SQL queries
 	*/
 
-	namespace apf\db\mysql5{
+	namespace apf\db\mysql{
+
+		private	$fields	=	Array();
 
 		class Select extends Query implements \ArrayAccess{
 
-			private		$calcFoundRows	=	FALSE;
-			protected	$map			=	NULL;
+			protected	$map	=	NULL;
 
-			public function __construct($table=NULL,$params=NULL){
-				parent::__construct($table,$params);
+			public function __construct($tables=NULL){
+
+				parent::__construct($tables,$params);
+
 			}
 
 			public function __get($var){
@@ -33,24 +36,6 @@
 
 			}
 
-			public function getFoundRows(){
-
-				if(!$this->getCalcFoundRows()){
-
-					throw(new \Exception("To use this feature you must turn on the calcFoundRows")); 
-
-				}
-
-				$select	=	__CLASS__;
-				$select	=	new $select(NULL,$this->params);
-				$select->fields(Array("FOUND_ROWS()"=>"total"));
-				$result	=	$select->execute();
-				if(!is_null($result)){
-					return $result["total"];
-				}
-
-			}
-
 			public function map($map){
 				$this->map=$map;
 			}
@@ -59,33 +44,11 @@
 				return $this->map;
 			}
 			
-			public function calcFoundRows($boolean=TRUE){
-
-				$this->calcFoundRows	=	(bool)$boolean;
-
-			}
-
 			/*Array access interface*/
 			public function offsetGet($offset){
 
 				$this->validateResult();
 				return $this->result[$offset];
-
-			}
-
-			private function validateResult(){
-
-				if(is_null($this->result)){
-
-					$this->execute();
-
-					if(is_null($this->result)){
-
-						throw(new \Exception("Query returned no rows"));
-
-					}
-
-				}
 
 			}
 
@@ -126,39 +89,7 @@
 
 			}
 
-			public function fields(Array $fields=Array(),$aliasOrder="LTR"){
-
-				if($aliasOrder!=="LTR"&&$aliasOrder!=="RTL"){
-
-					throw(new \Exception("Unknown alias order \"$aliasOrder\""));
-
-				}
-
-				$tmpFields	=	Array();
-
-				foreach($fields as $k=>&$v){
-
-					$k	=	$this->adapter->real_escape_string($k);
-					$v	=	$this->adapter->real_escape_string($v);
-
-					if(empty($v)){
-						$v="''";
-					}
-
-					if(!is_numeric($k)){
-
-						if($aliasOrder=="LTR"){
-							$v	=	$k.' AS '. $v;
-							continue;
-						}
-
-						$v	=	$v.' AS '. $k;
-
-					}
-
-				}
-
-				$this->sqlArray["fields"]	=	$fields;
+			public function fields(Array $fields=Array()){
 
 				return $this;
 
@@ -210,26 +141,6 @@
 			}
 
 			public function getOrder(){
-
-				if(!sizeof($this->sqlArray["order"])){
-
-					return '';
-
-				}
-
-				$sql	=	"ORDER BY ";
-
-				$order	=	Array();
-
-				foreach($this->sqlArray["order"] as $field=>$sort){
-
-					$field	=	$this->adapter->real_escape_string($field);
-					$order[]	=	"$field $sort";
-
-				}
-
-				return $sql.implode(',',$order);
-
 			}
 
 			public function union(Select $select){

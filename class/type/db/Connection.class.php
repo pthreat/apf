@@ -43,6 +43,7 @@
 				if(!is_array($data)){
 
 					throw(new \Exception("Creating a connection needs a data structure, array or stdClass"));
+
 				}
 
 				$missing	=	\apf\Validator::arrayKeys(["id","host","port","name","user","pass","driver"],$data,$throw=FALSE);

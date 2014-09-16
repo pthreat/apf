@@ -59,7 +59,7 @@
 
 			}
 
-			private function addInstance($value=NULL,$name=NULL){
+			private static function addInstance($value=NULL,$name=NULL){
 
 				if(self::instanceExists($name)){
 

@@ -2,7 +2,7 @@
 
 	namespace apf\core {
 
-		class Logger {
+		class Log implements \apf\iface\Log{
 
 			/**
 			 * @var $colors Array Different colors for console output
@@ -30,13 +30,6 @@
 
 			private $_colors = TRUE;
 
-	
-			/**
-			 * @var resource file pointer
-			 */
-
-			private $_fp = NULL;
-
 			/**
 			 * @var $_uselogDate
 			 * @see Log::useLogDate($filename)
@@ -45,11 +38,11 @@
 			private $_useLogDate = FALSE;
 	
 			/**
-			 * @var $_filename String name of log file
+			 * @var $file String name of log file
 			 * @see Log::setFilename($filename)
 			 */
 	
-			private  $_filename = NULL;
+			private  $file	=	NULL;
 	
 			/**
 			*
@@ -99,20 +92,35 @@
 			*/
 
 			private	$_lineCharacter	=	"\n";	
-	
-			public function setFilename($filename=NULL){
-	
-			  if(!empty($this->_filename)){
-					$this->endLog();
+
+			public function __construct($logFile=NULL){
+
+				if(!is_null($logFile)){
+
+					$this->setFileName($logFile);
+
 				}
+
+			}
 	
-				$this->_filename = (empty($filename)) ? "Log_".date("d-M-Y_H:i:s") : $filename;
-	
-				if(!$this->openFile()){
-					throw(new \Exception("Unable to log to $filename, please check file permissions!"));
+			public function toFile($file=NULL){
+
+				$file	=	empty($file)	?	"apf.".date("Y-m-d_h-i-s").".log"	:	$file;
+
+				if($file instanceof \apf\core\File){
+
+					if(!$file->getFile()){
+
+						$file->setFilename($logFilename);
+
+					}
+
+					$this->file	=	$file;
+					return;
+
 				}
-	
-				return TRUE;
+
+				$this->file	=	new \apf\core\File($file,$checkIfExists=FALSE);
 	
 			}
 	
@@ -124,11 +132,6 @@
 				return $this->_x11Info;
 			}
 	
-			private function openFile() {
-	
-				return $this->_fp = @fopen($this->_filename.".log","a+");
-	
-			}
 	
 			/**
 			*Specifies if date should be prepended in the log file
@@ -136,7 +139,9 @@
 			*@param boolean $boolean FALSE do NOT prepend date
 			*/
 			public function useLogDate($boolean=TRUE){
+
 					$this->_useLogDate = $boolean;
+
 			}
 
 			public function setCarriageReturnChar($char="\n"){
@@ -199,10 +204,10 @@
 	
 				}
 	
-				if(!empty($this->_filename)){
+				if(!is_null($this->file)){
 	
 					$write	= TRUE;
-					$write	&= $this->_fwrite($msg."\n");
+					$write	&= $this->file->write($msg."\n");
 	
 					return $write;
 	
@@ -214,22 +219,6 @@
 				echo $this->colors["light_gray"]."\r";
 			}
 	
-			private function _fwrite($msg){
-
-				$return = fwrite($this->_fp,$msg);
-	
-				if($return === FALSE){
-	
-					$msg = "Error writing to log file, youre trying to write this log file in ".$this->_filename.".log".
-					"check for permission problems and disk space";
-	
-					throw (new \Exception($msg));
-	
-				}
-	
-				return strlen($msg);
-	
-			}
 	
 			/**
 			*Returns an X11 debug like tag according to the given number
@@ -273,6 +262,12 @@
 
 			public function error($text=NULL){
 
+				$this->log($text,1,"light_red");
+
+			}
+
+			public function emergency($text=NULL){
+
 				$this->log($text,1,"red");
 
 			}
@@ -289,8 +284,12 @@
 			*/
 
 			public function endLog() {
-	
-				return fclose($this->_fp);
+
+				if(!is_null($this->file)){
+
+					$this->file->close();
+
+				}
 	
 			}
 	

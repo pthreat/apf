@@ -112,9 +112,7 @@
 										$class.".class.php";
 					break;
 
-
 				}
-
 
 				if(!file_exists($file)){
 
@@ -125,7 +123,6 @@
 				return require	$file;
 
 			}
-
 
 			public static function init($cfgFile=NULL,Array $classMap=Array(),$appClassDir=NULL){
 
@@ -173,18 +170,18 @@
 
 						if($dbConfig){
 
-							foreach($dbConfig as $dbName=>$data){
+							foreach($dbConfig as $dbName=>$options){
 
-								$data->id	=	(isset($data->id))	?	$data->id	:	$dbName;
+								$options->id	=	(isset($options->id))	?	$options->id	:	$dbName;
 
 								//Do NOT connect unless it's required
 								//In this fashion we just add a connection
 								//but we do NOT connect unless we are required to do so, we just 
-								//add the connection data.
+								//add the connection options.
 
 								try{
 
-									$connectionData	=	\apf\type\db\Connection::create($data);
+									$connectionData	=	\apf\type\db\Connection::create($options);
 
 								}catch(\Exception $e){
 
@@ -192,8 +189,28 @@
 
 								}
 
-								
-								$db	=	\apf\db\Adapter::addConnection($connectionData);
+								if(!isset($options->cache_method)){
+
+									$options->cache_method	=	"disk";
+
+								}
+
+								if(!isset($options->cache_dir)){
+
+									$options->cache_dir	=	self::$appDir.DIRECTORY_SEPARATOR.
+																	"cache".DIRECTORY_SEPARATOR.
+																	"db".DIRECTORY_SEPARATOR;
+
+								}
+
+								try{
+
+									$db	=	\apf\db\Pool::addConnection($connectionData,(Array)$options);
+
+								}catch(\Exception $e){
+
+									throw new \Exception("Error in config file $config, section $dbName: ".$e->getMessage());
+								}
 
 							}
 
@@ -202,6 +219,12 @@
 					}
 
 				}
+
+			}
+
+			public function getAppDir(){
+
+				return self::$appDir;
 
 			}
 
