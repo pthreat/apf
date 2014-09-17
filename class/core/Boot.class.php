@@ -36,9 +36,16 @@
 
 			public static function autoLoad($class){
 
+				$class		=	trim($class,"\\");
 				$isAPFClass	=	substr($class,0,strpos($class,"\\"))=="apf";
 
 				if(!$isAPFClass){
+
+					if(class_exists($class,FALSE)){
+
+						return;
+
+					}
 				
 					$map	=	self::isMapped(substr($class,0,strrpos($class,'\\')));
 
@@ -69,12 +76,28 @@
 
 				}
 
-
 				$class	=	trim(substr($class,strpos($class,"\\")+1));
 				$path		=	explode("\\",$class);
 				$class	=	implode('/',$path);
 
 				switch($path[0]){
+
+					case "dbc":
+
+						$connection	=	\apf\db\Pool::getConnection($path[1]);
+
+						if(!$connection){
+
+							$msg	=	"There's no connection in the connection pool named $path[1], ".
+										"please remember that the \\apf\\dbc namespace is *special*";
+
+							throw new \Exception($msg);
+
+						}
+
+						$file	=	$connection->createTableClassCache($path[2]);
+
+					break;
 
 					case "component":
 						$file		=	self::$frameworkDir.DIRECTORY_SEPARATOR.

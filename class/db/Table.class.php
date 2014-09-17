@@ -5,13 +5,13 @@
 		abstract class Table{
 
 			//connection id is necessary to perform queries
-			private	$connectionId		=	NULL;
-			private	$schema				=	NULL;
-			private	$name					=	NULL;
-			private	$alias				=	NULL;
-			private	$columns				=	Array();
+			protected	$connectionId		=	NULL;
+			protected	$schema				=	NULL;
+			protected	$name					=	NULL;
+			protected	$alias				=	NULL;
+			protected	$columns				=	Array();
 
-			public final function __construct($connectionId,$schema,$name){
+			public function __construct($connectionId=NULL,$schema=NULL,$name=NULL){
 			
 				$this->setConnectionId($connectionId);
 				$this->setSchema($schema);

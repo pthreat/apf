@@ -30,6 +30,12 @@
 
 			}
 
+			public function exists(){
+
+				return file_exists($this->getFile());
+
+			}
+
 			public function getMd5Sum(){
 
 				return md5_file($this->getFile());
@@ -66,7 +72,7 @@
 
 			public function close(){
 
-				if(is_null($this->fp)){
+				if(!$this->fp){
 
 					throw(new \Exception("Theres no file handler open, the file can't be closed"));
 
@@ -91,7 +97,7 @@
 
 				}
 
-				$this->fp	=	fopen($this,$mode);
+				$this->fp	=	@fopen($this,$mode);
 
 				if(!$this->fp){
 
@@ -100,6 +106,20 @@
 				}
 
 				return $this->fp;
+
+			}
+
+			public function putContents(){
+
+				$bytes	=	file_put_contents($this->getFile(),$this->contents);
+
+				if($bytes===FALSE){
+
+					throw new \Exception("Unable to put file contents");
+
+				}
+
+				return TRUE;
 
 			}
 
@@ -189,8 +209,7 @@
 
 			}
 
-
-			public function setFileName($file){
+			public function setFilename($file){
 
 				$this->dirname = dirname($file);
 				$this->file    = basename($file);

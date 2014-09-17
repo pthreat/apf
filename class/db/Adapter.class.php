@@ -68,16 +68,22 @@
 
 						$dir	=	trim($options["cache_dir"],DIRECTORY_SEPARATOR);
 						$dir	=	$dir.DIRECTORY_SEPARATOR.
-									DIRECTORY_SEPARATOR.$this->data->getId().
-									DIRECTORY_SEPARATOR.$this->data->getDatabase();
+									$this->data->getId().DIRECTORY_SEPARATOR.
+									$this->data->getDatabase();
 
-						if(!is_dir($dir)){
+						try{
 
-							if(!mkdir($dir,0755,TRUE)){
-								
-								throw new \Exception("Unable to create database cache directory:$dir");
+							$dir	=	new \apf\core\Directory($dir);
+
+							if(!$dir->exists()){
+
+								$dir->create();
 
 							}
+
+						}catch(\Exception $e){
+
+							throw new \Exception("Unable to create database cache directory:$dir| ".$e->getMessage());
 
 						}
 
@@ -139,22 +145,92 @@
 
 			}
 
-			private function table2Class(\apf\db\Table $table){
+			public function getOptions(){
+
+				return $this->options;
+
+			}
+
+			public function createTableClassCache($name,$recache=FALSE){
+
+				$this->info("Selected cache method: class");
+
+				if(empty($this->options["cache_dir"])){
+
+					$msg	=	"Seems that you tried to bring a table from cache,".
+								"however there's no cache dir for this connection!". 
+								"Try reviewing your configuration!";
+
+					throw new \Exception($msg);
+
+				}
+
+				$class		=	"\\apf\\db\\".$this->data->getDriver()."\\Table";
+
+				$cacheFile	=	$this->options["cache_dir"].DIRECTORY_SEPARATOR.
+									strtolower($name).'.class.php';
+
+				$this->info("Checking if cache file exists: $cacheFile");
+
+				$file			=	new \apf\core\File($cacheFile,$check=FALSE);
+
+				if($file->exists()&&!$recache){
+
+					$this->info("Cache file exists and no recache has been specified, exiting");
+					return $cacheFile;
+
+				}
+
+				$this->info("Creating cache file: $cacheFile");
+
+				$table	=	new $class($this->data->getId(),$this->data->getDatabase(),$name);
+				$fqdn		=	"apf\\dbc\\".$this->data->getId();
+				$tplPath	=	__DIR__.DIRECTORY_SEPARATOR."TableTemplate.class.php";
+
+				$file		=	new \apf\core\File($tplPath,$check=FALSE);
+
+				$bTable	=	"\\apf\\db\\".$this->data->getDriver()."\\Table";
+				$columns	=	var_export($table->export(),TRUE);
+				$columns	=	preg_replace("/[\\r\\n\s]/","",$columns);
+
+				$tpl		=	$file->getContents();
+
+				$tpl		=	preg_replace("/\[fqdn\]/",$fqdn,$tpl);
+				$tpl		=	preg_replace("/\[basetable\]/",$bTable,$tpl);
+				$tpl		=	preg_replace("/\[connectionId\]/",$this->data->getId(),$tpl);
+				$tpl		=	preg_replace("/\[schema\]/",$this->data->getDatabase(),$tpl);
+				$tpl		=	preg_replace("/\[tablename\]/",$name,$tpl);
+				$tpl		=	preg_replace("/\[name\]/",$name,$tpl);
+				$tpl		=	preg_replace("/\[alias\]/","",$tpl);
+				$tpl		=	preg_replace("/\[columns\]/",$columns,$tpl);
+
+				$file	=	new \apf\core\File($cacheFile,$check=FALSE);
+				$file->setContents($tpl);
+				$file->putContents();
+
+				$this->info("Wrote class cache file $cacheFile");
+
+				return $cacheFile;
+
 			}
 
 			private function getCachedTable($name,$from,$recache=FALSE){
 
 				$class	=	"\\apf\\db\\".$this->data->getDriver()."\\Table";
-				$table	=	new $class($this->data->getId(),$this->data->getDatabase(),$name);
 
 				switch(strtolower($from)){
 
 					case "memory":
 
+						$table	=	new $class($this->data->getId(),$this->data->getDatabase(),$name);
+
 						$this->info("Selected cache method: memory");
+
 						$memoryTable	=	$this->findTableInMemory($name);
 
 						if(!$this->findTableInMemory($name)||$recache){
+
+							$this->info("Didn't find table $name in memory, caching");
 
 							self::addTable($this->data->getId(),$this->data->getDatabase(),$table);
 
@@ -162,15 +238,29 @@
 							
 						}
 
+						$this->success("Found $name in memory");
+
 						return $memoryTable;
+
+					break;
+
+					case "class":
+
+						return $this->createClassCache($name);
 
 					break;
 
 					case "disk":
 					default:
 
+						$table	=	new $class($this->data->getId(),$this->data->getDatabase(),$name);
+
+						$this->info("Selected cache method: disk");
+
 						$cacheFile	=	$this->options["cache_dir"].DIRECTORY_SEPARATOR.
 											$table->getName().'.'.$this->options["cache_format"];
+
+						$this->info("Cache file: $cacheFile");
 
 						if(!$table->exists()){
 
@@ -232,12 +322,12 @@
 								$cacheContents	=	serialize($table->export());
 							break;
 
-							case "class":
-							break;
 
 						}
 
-						file_put_contents($cacheFile,$cacheContents);
+						$file	=	new \apf\core\File($cacheFile,$check=FALSE);
+						$file->setContents($cacheContents);
+						$file->putContents();
 
 						return $table;
 

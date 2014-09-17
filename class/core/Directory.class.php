@@ -2,39 +2,49 @@
 
 	namespace apf\core{
 
-		class Directory{
+		class Directory extends \SPLFileInfo{
 
-			private	$_directory	=	NULL;
+			public function __construct($directory=NULL){
 
-			public function __construct($directory){
-
-				$this->setDirectory($directory);
+				parent::__construct($directory);
 
 			}
 
-			public function setDirectory($directory){
-		
-				if(!is_dir($directory)){
+			public function exists(){
 
-					throw(new \Exception("Invalid directory \"$directory\". Directory doesn't exists"));
+				return is_dir($this->getPath());
+
+			}
+
+			public function create($mode=0755){
+
+				if($this->isFile()){
+
+					throw new \Exception("File exists but it's not a directory");
 
 				}
 
-				$this->_directory	=	$directory;
+				if($this->exists()){
+
+					throw new \Exception("Directory already exists");
+
+				}
+
+				if(!@mkdir($this->getPathName(),$mode,TRUE)){
+
+					throw new \Exception("Can't create directory ".$this->getPathName());
+
+				}
+
+				return TRUE;
 
 			}
 
-			public function getDirectory(){
-
-				return $this->_directory;
-
-			}
-
-			public function getFilesAsArray(){
-
-				$directoryIterator	=	new \DirectoryIterator($this->_directory);
+			public function ls(){
 
 				$files	=	Array();
+
+				$directoryIterator	=	new \DirectoryIterator($this->getFilename());
 
 				foreach ($directoryIterator as $fileInfo){
 

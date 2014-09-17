@@ -4,6 +4,12 @@
 
 		class Table extends \apf\db\Table{
 
+			public function __construct($connectionId=NULL,$schema=NULL,$name=NULL){
+				parent::setConnectionId($connectionId);
+				parent::setSchema($schema);
+				parent::setName($name);
+			}
+
 			public function dump(){
 
 				$sql	=	"SELECT COLUMN_NAME,DATA_TYPE,COLLATION_NAME,COLUMN_KEY,EXTRA, ".
