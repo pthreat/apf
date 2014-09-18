@@ -246,7 +246,7 @@
 
 					case "class":
 
-						return $this->createClassCache($name);
+						return $this->createTableClassCache($name);
 
 					break;
 

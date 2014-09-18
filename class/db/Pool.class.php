@@ -8,12 +8,14 @@
 
 				\apf\traits\pattern\Mingleton::getInstanceNames as listConnections;
 				\apf\traits\pattern\Mingleton::getInstance as getConnection;
+				\apf\traits\pattern\Mingleton::getInstanceCount as getConnectionCount;
+				\apf\traits\pattern\Mingleton::instanceExists as connectionExists;
 
 			}
 
 			public static function connectAll(){
 
-				foreach(self::listConnections as $name){
+				foreach(self::listConnections() as $name){
 
 					self::getConnection($name)->connect();
 

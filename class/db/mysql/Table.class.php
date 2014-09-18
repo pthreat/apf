@@ -10,6 +10,12 @@
 				parent::setName($name);
 			}
 
+			public function select(){
+
+				return new \apf\db\mysql\Select($this);
+
+			}
+
 			public function dump(){
 
 				$sql	=	"SELECT COLUMN_NAME,DATA_TYPE,COLLATION_NAME,COLUMN_KEY,EXTRA, ".
