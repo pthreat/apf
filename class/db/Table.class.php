@@ -39,17 +39,11 @@
 
 				}
 
-				foreach($columns as $column){
+				foreach($columns as $name=>$value){
 
-					$this->addColumn($column);
+					$this->addColumn($name,$value);
 
 				}
-
-			}
-
-			public final function getColumns(){
-
-				return $this->columns;	
 
 			}
 
@@ -79,23 +73,21 @@
 
 			public final function export(){
 
-				$this->setColumns($this->dump());
-				return $this->getColumns();
+				$this->setColumns($this->getColumnsFromDbSchema());
+				return $this->columns;
 
 			}
 
-			public final function addColumn($column){
+			public final function addColumn($name,$value){
 
 				$requiredKeys	=	Array("name","type","extra","key","charset","maxlen","octlen","null","pdo");
-				\apf\Validator::arrayKeys($requiredKeys,$column);
-				$this->columns[]	=	$column;
+				\apf\Validator::arrayKeys($requiredKeys,$value);
+				$this->columns[$name]	=	$value;
 
 			}
 
 			public function setAlias($alias){
 
-				$adapter			=	Adapter::getInstance($this->params);
-				$alias			=	$adapter->real_escape_string($alias);
 				$this->alias	=	$alias;
 
 			}
@@ -106,17 +98,47 @@
 
 			}
 
-			public function save(){
+			public final function getColumns(){
+
+				if(!empty($this->columns)){
+
+					return $this->columns;
+
+				}
+
+				return $this->getColumnsFromDbSchema();
+
 			}
 
-			public function truncate(){
+			public final function getColumnsAsString($aliased=FALSE){
+
+				if(is_null($this->columns)){
+
+					$this->getColumns();
+
+				}
+
+				$fields	=	Array();
+
+				foreach($this->columns as $column){
+
+					if($aliased&&!is_null($this->alias)){
+
+						$column["name"]	=	$this->alias.'.'.$column["name"];
+						
+					}
+
+					$fields[]	=	$column["name"];
+
+				}
+
+				return implode(',',$fields);
+
 			}
 
-			public function drop(){
-			}
-
-			abstract public function dump();
+			abstract public function getColumnsFromDbSchema();
 			abstract public function exists();
+			abstract public function select();
 
 			public function __toString(){
 

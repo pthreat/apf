@@ -16,9 +16,11 @@
 
 			public static function getInstance($name=null){
 
-				if(sizeof(self::$instances)==1||is_null($name)){
+				if(sizeof(self::$instances)==1&&empty($name)){
 
-					return array_pop(self::$instances);
+					$keys	=	array_keys(self::$instances);
+					$keys	=	$keys[0];
+					return self::$instances[$keys];
 
 				} 
 

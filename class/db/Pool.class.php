@@ -13,6 +13,14 @@
 
 			}
 
+			public static function connectionExists($connectionId){
+
+				var_dump(self::getInstanceNames());
+
+				return in_array($connectionId,self::getInstanceNames());
+
+			}
+
 			public static function connectAll(){
 
 				foreach(self::listConnections() as $name){

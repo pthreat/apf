@@ -68,16 +68,26 @@
 
 						$dir	=	trim($options["cache_dir"],DIRECTORY_SEPARATOR);
 						$dir	=	$dir.DIRECTORY_SEPARATOR.
-									$this->data->getId().DIRECTORY_SEPARATOR.
-									$this->data->getDatabase();
+									$this->data->getId();
+
+						//Store BASE cache dir in options
+						$options["cache_dir"]	=	$dir;
 
 						try{
 
-							$dir	=	new \apf\core\Directory($dir);
+							$schemas	=	$this->data->getSchemas();
 
-							if(!$dir->exists()){
+							foreach($this->data->getSchemas() as $schema){
 
-								$dir->create();
+								$tmpDir	=	$dir.DIRECTORY_SEPARATOR.$schema;
+								$dirObj	=	new \apf\core\Directory($tmpDir);
+
+								if(!$dirObj->exists()){
+
+									$this->info("Creating cache directory $tmpDir");
+									$dirObj->create();
+
+								}
 
 							}
 
@@ -87,7 +97,6 @@
 
 						}
 
-						$options["cache_dir"]	=	$dir;
 
 					break;
 
@@ -151,7 +160,11 @@
 
 			}
 
-			public function createTableClassCache($name,$recache=FALSE){
+			private function getAmountOfSchemasInUse(){
+				return sizeof($this->data->getSchemas());	
+			}
+
+			public function createTableClassCache($name,$schema=NULL,$recache=FALSE){
 
 				$this->info("Selected cache method: class");
 
@@ -168,6 +181,7 @@
 				$class		=	"\\apf\\db\\".$this->data->getDriver()."\\Table";
 
 				$cacheFile	=	$this->options["cache_dir"].DIRECTORY_SEPARATOR.
+									$schema.DIRECTORY_SEPARATOR.
 									strtolower($name).'.class.php';
 
 				$this->info("Checking if cache file exists: $cacheFile");
@@ -183,8 +197,14 @@
 
 				$this->info("Creating cache file: $cacheFile");
 
-				$table	=	new $class($this->data->getId(),$this->data->getDatabase(),$name);
-				$fqdn		=	"apf\\dbc\\".$this->data->getId();
+				$table	=	new $class($this->data->getId(),$schema,$name);
+
+				if(!$table->exists()){
+					throw new \Exception("No such table $name");
+				}
+
+				$fqdn		=	"apf\\dbc\\".$this->data->getId()."\\$schema";
+
 				$tplPath	=	__DIR__.DIRECTORY_SEPARATOR."TableTemplate.class.php";
 
 				$file		=	new \apf\core\File($tplPath,$check=FALSE);
@@ -198,7 +218,7 @@
 				$tpl		=	preg_replace("/\[fqdn\]/",$fqdn,$tpl);
 				$tpl		=	preg_replace("/\[basetable\]/",$bTable,$tpl);
 				$tpl		=	preg_replace("/\[connectionId\]/",$this->data->getId(),$tpl);
-				$tpl		=	preg_replace("/\[schema\]/",$this->data->getDatabase(),$tpl);
+				$tpl		=	preg_replace("/\[schema\]/",$schema,$tpl);
 				$tpl		=	preg_replace("/\[tablename\]/",$name,$tpl);
 				$tpl		=	preg_replace("/\[name\]/",$name,$tpl);
 				$tpl		=	preg_replace("/\[alias\]/","",$tpl);
@@ -214,7 +234,48 @@
 
 			}
 
-			private function getCachedTable($name,$from,$recache=FALSE){
+			public final function getTable($name=NULL,$cacheMethod=NULL,$recache=FALSE){
+
+				$cacheMethod	=	is_null($cacheMethod) ? $this->options["method"]	:	$cacheMethod;
+				$schema			=	NULL;
+
+				//If a given connection has assigned more than one schema ... (i.e connection1,connection2)
+				if($this->data->getAmountOfSchemas()>1){
+
+					//We expect the user to specify a schema through semicolon syntax
+					$delimiterPos	=	strpos($name,':');
+
+					if($delimiterPos){
+
+						$msg	=	"Since you have more than one schema in this connection, you must ".
+									"specify from which schema you want the table from by using ".
+									"passing schema:table";
+
+						throw new \Exception($msg);
+
+					}
+
+					$schema	=	substr($name,0,$delimiterPos);
+					$table	=	substr($name,$delimiterPos+1);
+
+					if(!$this->data->isValidSchema($schema)){
+
+						throw new \Exception("Invalid schema $name for this connection");
+
+					}
+
+				}else{
+
+					//There's only one schema
+					$schema	=	$this->data->getSchemas()[0];
+
+				}
+
+				return $this->getCachedTable($name,$schema,$cacheMethod,$recache);
+
+			}
+
+			private function getCachedTable($name,$schema,$from,$recache=FALSE){
 
 				$class	=	"\\apf\\db\\".$this->data->getDriver()."\\Table";
 
@@ -222,17 +283,17 @@
 
 					case "memory":
 
-						$table	=	new $class($this->data->getId(),$this->data->getDatabase(),$name);
+						$table	=	new $class($this->data->getId(),$schema,$name);
 
 						$this->info("Selected cache method: memory");
 
-						$memoryTable	=	$this->findTableInMemory($name);
+						$memoryTable	=	$this->findTableInMemory($name,$schema);
 
-						if(!$this->findTableInMemory($name)||$recache){
+						if(!$memoryTable||$recache){
 
 							$this->info("Didn't find table $name in memory, caching");
 
-							self::addTable($this->data->getId(),$this->data->getDatabase(),$table);
+							self::addTable($this->data->getId(),$schema,$table);
 
 							return $table;
 							
@@ -246,14 +307,14 @@
 
 					case "class":
 
-						return $this->createTableClassCache($name);
+						return $this->createTableClassCache($name,$schema);
 
 					break;
 
 					case "disk":
 					default:
 
-						$table	=	new $class($this->data->getId(),$this->data->getDatabase(),$name);
+						$table	=	new $class($this->data->getId(),$schema,$name);
 
 						$this->info("Selected cache method: disk");
 
@@ -337,15 +398,15 @@
 
 			}
 
-			private function findTableInMemory($name){
+			private function findTableInMemory($name,$schema){
 
-				if(empty(self::$instances[$this->data->getId()][$this->data->getDatabase()]["tables"])){
+				if(empty(self::$instances[$this->data->getId()][$schema]["tables"])){
 
 					return FALSE;
 
 				}
 
-				$memoryCache	=	&self::$instances[$this->data->getId()][$this->data->getDatabase()]["tables"];
+				$memoryCache	=	&self::$instances[$this->data->getId()][$schema]["tables"];
 
 				foreach($memoryCache as $cname=>$cache){
 
@@ -368,13 +429,6 @@
 			private static function addTable($connectionId,$schema,\apf\db\Table $table){
 
 				return self::$instances[$connectionId][$schema]["tables"][$table->getName()]	=	$table;
-
-			}
-
-			public final function getTable($name=NULL,$cacheMethod=NULL,$recache=FALSE){
-
-				$cacheMethod	=	is_null($cacheMethod) ? $this->options["method"]	:	$cacheMethod;
-				return $this->getCachedTable($name,$cacheMethod,$recache);
 
 			}
 

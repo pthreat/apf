@@ -12,7 +12,7 @@
 
 			public function exists(){
 
-				return is_dir($this->getPath());
+				return is_dir($this->getPathName());
 
 			}
 
@@ -29,6 +29,7 @@
 					throw new \Exception("Directory already exists");
 
 				}
+
 
 				if(!@mkdir($this->getPathName(),$mode,TRUE)){
 

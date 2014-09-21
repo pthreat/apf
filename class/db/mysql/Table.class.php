@@ -12,11 +12,11 @@
 
 			public function select(){
 
-				return new \apf\db\mysql\Select($this);
+				return new Select($this);
 
 			}
 
-			public function dump(){
+			public function getColumnsFromDbSchema(){
 
 				$sql	=	"SELECT COLUMN_NAME,DATA_TYPE,COLLATION_NAME,COLUMN_KEY,EXTRA, ".
 							"CHARACTER_SET_NAME,CHARACTER_MAXIMUM_LENGTH,CHARACTER_OCTET_LENGTH, ".

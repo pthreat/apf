@@ -86,6 +86,7 @@
 
 						$connection	=	\apf\db\Pool::getConnection($path[1]);
 
+
 						if(!$connection){
 
 							$msg	=	"There's no connection in the connection pool named $path[1], ".
@@ -95,7 +96,18 @@
 
 						}
 
-						$file	=	$connection->createTableClassCache($path[2]);
+						if(sizeof($path)<3){
+
+							$msg	=	"Amount of schemas is greater than 1 and no schema has been specified";
+							throw new \Exception($msg);
+
+						}
+
+						$schema	=	$path[2];
+						$table	=	$path[3];
+
+
+						$file		=	$connection->createTableClassCache($table,$schema);
 
 					break;
 

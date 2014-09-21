@@ -5,16 +5,42 @@
 		class Connection extends \apf\type\net\Connection{
 
 			private	$id			=	NULL;
-			private	$database	=	NULL;
+			private	$schemas		=	Array();
 			private	$driver		=	NULL;
-			private	$persistent	=	NULL;
+			private	$options		=	NULL;
 
-			public function __construct($host=NULL,$port=NULL,\apf\type\User $user,$id=NULL,$database=NULL,$driver=NULL){
+			public function __construct($host=NULL,$port=NULL,\apf\type\User $user,$id=NULL,$schemas=NULL,$driver=NULL,Array $options=Array()){
 
 				parent::__construct($host,$port,$user);
-				$this->setDatabase($database);
+
+
+				$schemas	=	explode(',',$schemas);
+
+				$this->setSchemas($schemas);
 				$this->setDriver($driver);
 				$this->setId($id);
+
+				if(sizeof($options)){
+
+					$this->setOptions($options);
+
+				}
+
+			}
+
+			public function getAmountOfSchemas(){
+
+				return sizeof($this->schemas);
+
+			}
+
+			public function setSchemas(Array $schemas){
+
+				foreach($schemas as $schema){
+
+					$this->addSchema($schema);
+
+				}
 
 			}
 
@@ -27,6 +53,18 @@
 			public function getId(){
 
 				return $this->id;
+
+			}
+
+			public function setOptions(Array $options){
+
+				$this->options	=	$options;
+
+			}
+
+			public function getOptions(){
+
+				return $this->options;
 
 			}
 
@@ -46,7 +84,7 @@
 
 				}
 
-				$missing	=	\apf\Validator::arrayKeys(["id","host","port","name","user","pass","driver"],$data,$throw=FALSE);
+				$missing	=	\apf\Validator::arrayKeys(["id","host","port","schemas","user","pass","driver"],$data,$throw=FALSE);
 
 				if(is_string($missing)){
 
@@ -64,8 +102,13 @@
 				$host	=	new \apf\net\Host($data["host"]);
 
 				$class	=	__CLASS__;
-				return new $class($host,$data["port"],$user,$data["id"],$data["name"],$data["driver"]);
 
+				return new $class($host,$data["port"],$user,$data["id"],$data["schemas"],$data["driver"]);
+
+			}
+
+			public function isValidSchema($schema=NULL){
+				return in_array($schema,$this->schemas);	
 			}
 
 			public function setDriver($driver=NULL){
@@ -90,15 +133,21 @@
 
 			}
 
-			public function setDatabase($name=NULL){
+			public function addSchema($name=NULL){
 
-				$this->database	=	\apf\Validator::emptyString($name,"Database name can't be empty");
+				if(in_array($name,$this->schemas)){
+
+					throw new \Exception("Duplicated schema name \"$name\"");
+
+				}
+
+				$this->schemas[]	=	\apf\Validator::emptyString($name,"Schema name can't be empty");
 
 			}
 
-			public function getDatabase(){
+			public function getSchemas(){
 
-				return $this->database;
+				return $this->schemas;
 
 			}
 
@@ -107,12 +156,20 @@
 				$port	=	$this->getPort();
 
 				if($port){
+
 					$port	=	";port=$port";
+
 				}
 
 				$string	=	'';
 				$string .=	$this->driver.':host='.$this->getHost()->get().
-								$port.';dbname='.$this->database;
+								$port.';dbname=';
+
+				if(sizeof($this->schemas)){
+
+					$string.=$this->schemas[0];
+
+				}
 
 				if($addUser){
 					$string.='|user:'.$this->getUser()->getName();
