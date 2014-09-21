@@ -10,9 +10,8 @@
 
 			public function getSQL(){
 
-				foreach($this->getTables() as $table){
-					var_dump($table->getColumnsAsString());
-				}
+				$sql	=	sprintf("SELECT %s",implode(',',$this->getColumns()));
+				return $sql;
 
 			}
 

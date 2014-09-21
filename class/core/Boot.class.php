@@ -207,6 +207,10 @@
 
 							foreach($dbConfig as $dbName=>$options){
 
+								$origDbName	=	$dbName;
+								$dbName		=	substr($dbName,strlen("database"));
+								$dbName		=	trim($dbName);
+
 								$options->id	=	(isset($options->id))	?	$options->id	:	$dbName;
 
 								//Do NOT connect unless it's required
@@ -220,7 +224,10 @@
 
 								}catch(\Exception $e){
 
-									throw new \Exception("Error in config file $config, section $dbName: ".$e->getMessage());
+									$msg	=	"Error in config file $config, ".
+												"section $origDbName: ".$e->getMessage();
+
+									throw new \Exception($msg,1,$e);
 
 								}
 
@@ -244,7 +251,11 @@
 
 								}catch(\Exception $e){
 
-									throw new \Exception("Error in config file $config, section $dbName: ".$e->getMessage());
+									$msg	=	"Error in config file $config, ".
+												"section $origDbName:";
+
+									throw new \Exception($msg,1,$e);
+
 								}
 
 							}

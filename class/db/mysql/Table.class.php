@@ -10,11 +10,17 @@
 				parent::setName($name);
 			}
 
-			public function select(){
+			public function select(Array $columns=Array()){
 
-				return new Select($this);
+				return new Select($this,$columns=Array());
 
 			}
+
+			protected function _find($values,$columns=NULL){
+				var_dump($columns);
+				die();
+			}
+
 
 			public function getColumnsFromDbSchema(){
 

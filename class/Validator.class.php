@@ -38,7 +38,7 @@
 						$msg	=	"Empty String";
 					}
 
-					throw(new \Exception($msg));
+					throw new \Exception($msg);
 
 				}
 

@@ -4,24 +4,25 @@
 
 		abstract class Query{
 
-			protected	$tables	=	Array();
-			protected	$query	=	Array(
-													 "fields"=>Array(),
-													 "where"=>NULL,
-													 "having"=>Array(),
-													 "group"=>Array(),
-													 "order"=>Array(),
-													 "limit"=>Array(),
-													 "offset"=>NULL,
-													 "union"=>NULL,
-													 "join"=>Array()
+			private		$tables			=	Array();
+			private		$columns			=	Array();
+			private		$where			=	'';
+			protected	$query			=	Array(
+													 "where"		=>NULL,
+													 "having"	=>Array(),
+													 "group"		=>Array(),
+													 "order"		=>Array(),
+													 "limit"		=>Array(),
+													 "offset"	=>NULL,
+													 "union"		=>NULL,
+													 "join"		=>Array()
 			);
-
-			protected	$tableColumns	=	Array();
 
 			abstract public function getSQL();
 
-			public final function __construct($tables=NULL){
+			public final function __construct($tables=NULL,$columns=NULL){
+
+				$this->setColumns($columns);
 
 				$amountOfConnections	=	\apf\db\Pool::getConnectionCount();
 
@@ -48,10 +49,10 @@
 
 						if($amountOfConnections>1){
 
-							//if more than one connection, the user must specify connectionid:table 
-							//format in order to know in which connection is he trying to make this query
-
-							//Note that the return value of strpos doesn't really matters here if it's false or 0
+						//if more than one connection, the user must specify connectionid:table 
+						//format in order to know in which connection is he trying to make this query
+						//Note that the return value of strpos doesn't really matters 
+						//here if it's false or 0
 
 							if(!strpos($table,':')){
 
@@ -146,6 +147,30 @@
 
 				}
 
+				$this->addTable($tables);
+
+			}
+
+			protected function getWhere(){
+
+				return $this->where;
+
+			}
+
+			public function where($string=NULL){
+
+				\apf\Validator::emptyString($string,"where clause must not be empty");
+
+				$this->where	=	$string;
+
+				return $this;
+
+			}
+
+			public function setColumns($columns=NULL){
+
+				$this->columns	=	$columns;
+
 			}
 
 			public function addTable(\apf\db\Table $table){
@@ -168,8 +193,6 @@
 
 				}
 
-				$this->validateFieldForTable($field,$setValue);
-				$this->query["fields"][]	=	$setValue;
 
 			}
 
@@ -187,19 +210,27 @@
 
 			}
 
-			private function validateFieldForTable($field,$setValue){
+			public function getColumn($column=NULL){
 
-				$found	=	FALSE;
+				$column	=	\apf\Validator::emptyString($column,"Must provide column name");
 
 				foreach($this->table->getColumns() as $colName=>$colValue){
 
-					if($field==$colName){
+					if($column==$colName){
 
-						$found	=	TRUE;
+						return $colValue;
 
 					}
 
 				}
+
+				return Array();
+
+			}
+
+			private function validateFieldForTable($field,$setValue){
+
+				$found	=	FALSE;
 
 				if(!$found){
 
@@ -223,6 +254,7 @@
 						}
 
 					break;
+
 					case "float":
 					case "double":
 
@@ -272,6 +304,31 @@
 			public function __set($var,$value){
 
 				$this->addField($var,$value);
+
+			}
+
+			public final function getColumns(){
+
+				if(sizeof($this->columns)){
+
+					return $this->columns;
+
+				}
+
+				foreach($this->tables as $table){
+
+					$alias	=	$table->getAlias();
+					$columns	=	Array();
+
+					foreach($table->getColumns() as $col){
+
+						$columns[]	=	$alias	?	$alias.'.'.$col["name"]	:	$col["name"];
+
+					}
+
+					return $columns;
+
+				}
 
 			}
 

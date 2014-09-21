@@ -46,7 +46,15 @@
 
 			public function setId($id){
 
-				$this->id	=	\apf\Validator::emptyString($id,"Connection ID must be not empty");
+				$id	=	\apf\Validator::emptyString($id,"Connection ID must be not empty");
+
+				if(strpos($id,' ')){
+
+					throw new \Exception("Connection id \"$id\" must NOT have any spaces");
+
+				}
+
+				$this->id	=	$id;
 
 			}
 
@@ -134,6 +142,14 @@
 			}
 
 			public function addSchema($name=NULL){
+
+				$name	=	trim($name);
+
+				if(strpos($name,' ')){
+
+					throw new \Exception("Schema name must NOT have any spaces in it");
+
+				}
 
 				if(in_array($name,$this->schemas)){
 

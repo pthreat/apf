@@ -19,6 +19,49 @@
 
 			}
 
+			public final function find($values,$columns=NULL){
+
+				//If the user does not specifies a columns, assume we are looking up by primary key
+
+				if(is_null($columns)){
+
+					$columns	=	$this->getPrimaryKey();
+
+					if(sizeof($columns)>1&&!is_array($columns)){
+
+						$msg	=	"It seems that the primary key of this table is a composite ".
+									"primary key composed of the following fields: ".implode(',',$columns)."\n".
+									"so in order to fulfill this condition, you must ".
+									"provide an array of values ordered as stated before";
+
+						throw new \Exception($msg);
+
+					}
+
+				}
+
+				//abstract method
+				$this->_find($values,$columns);
+
+			}
+
+			public function getPrimaryKey(){
+
+				//In case the primary key is a composite primary key ...
+				$pk	=	Array();
+
+				foreach($this->columns as $column){
+
+					if($column["key"]=="PRI"){
+						$pk[]	=	$column["name"];
+					}
+
+				}
+
+				return $pk;
+
+			}
+
 			public function setConnectionId($id){
 
 				$this->connectionId	=	$id;
@@ -139,6 +182,7 @@
 			abstract public function getColumnsFromDbSchema();
 			abstract public function exists();
 			abstract public function select();
+			abstract protected function _find($values,$columns=NULL);
 
 			public function __toString(){
 
