@@ -10,7 +10,7 @@
 	*/
 
 
-	namespace apolloframework\web\service{
+	namespace apf\web\service{
 
 		class Flickr {
 

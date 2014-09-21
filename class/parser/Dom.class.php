@@ -1,6 +1,6 @@
 <?php
 
-	namespace aidSQL\parser {
+	namespace apf\parser {
 
 		class Dom extends AbstractParser{
 

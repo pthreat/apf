@@ -1,6 +1,6 @@
 <?php
 
-	namespace aidSQL\http{
+	namespace apf\http{
 
 		class ProxyHandler {
 
@@ -10,7 +10,7 @@
 			private	$_proxyList			=	array();
 			private	$_revalidateOnGet	=	FALSE;
 
-			public function __construct(\aidSQL\http\Adapter $adapter,\aidSQL\core\Logger &$log, $ipUri="http://cfaj.freeshell.org/ipaddr.cgi"){
+			public function __construct(\apf\http\Adapter $adapter,\apf\core\Logger &$log, $ipUri="http://cfaj.freeshell.org/ipaddr.cgi"){
 
 				$this->setLog($log);
 
@@ -32,11 +32,11 @@
 
 			public function setIpUri($ipUri){
 
-				$this->_ipUri	=	new \aidSQL\parser\Uri($ipUri);
+				$this->_ipUri	=	new \apf\parser\Uri($ipUri);
 
 			}
 
-			public function setHttpAdapter(\aidSQL\http\Adapter $adapter){
+			public function setHttpAdapter(\apf\http\Adapter $adapter){
 
 				$adapter	=	clone($adapter);
 				$adapter->setUri($this->_ipUri);
@@ -48,7 +48,7 @@
 
 			}
 
-			public function setLog(\aidSQL\core\Logger &$log){
+			public function setLog(\apf\core\Logger &$log){
 				$this->_logger = $log;
 			}
 
@@ -68,7 +68,7 @@
 
 			public function checkProxyList($file=NULL,$shuffle=FALSE){
 
-				$file		=	new \aidSQL\core\File($file);
+				$file		=	new \apf\core\File($file);
 				$proxies	=	$file->getContentsAsArray();
 
 				if(!sizeof($proxies)){
