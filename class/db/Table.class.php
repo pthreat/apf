@@ -153,6 +153,23 @@
 
 			}
 
+			public function getColumn($colName=NULL){
+
+				foreach($this->getColumns() as $column){
+
+					if($column["name"] == $colName){
+
+						$column["table"]	=	&$this;
+						return new Column($column);
+
+					}
+
+				}
+
+				return FALSE;
+
+			}
+
 			public final function getColumnsAsString($aliased=FALSE){
 
 				if(is_null($this->columns)){

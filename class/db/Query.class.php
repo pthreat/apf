@@ -157,13 +157,48 @@
 
 			}
 
-			public function where($string=NULL){
+			public function where(Array $clause=Array()){
 
-				\apf\Validator::emptyString($string,"where clause must not be empty");
+				if(empty($clause)){
 
-				$this->where	=	$string;
+					throw new \Exception("Where clause can't be empty");
 
-				return $this;
+				}
+
+				$columns	=	array_keys($clause);
+
+				foreach($columns as $col){
+
+					$found	=	FALSE;
+
+					foreach($this->tables as $table){
+
+						$tmpCol	=	$table->getColumn($col);
+
+						if($tmpCol){
+
+							$found	=	TRUE;
+							$value	=	$clause[$col];
+							$col		=	$tmpCol;
+							break;
+
+						}
+
+					}
+
+					if(!$found){
+
+						throw new \Exception("No such column $col");
+
+					}
+
+					$col->setValue($value);
+					$this->where[]	=	$col;
+
+				}
+
+				var_dump($this->where);
+				die();
 
 			}
 
@@ -295,9 +330,40 @@
 
 			}
 
-			public function execute($smart=TRUE){
+			public function run($smart=TRUE){
 
-				$sql		=	sprintf("%s",$this);
+				$sql		=	$this->getSQL();
+				$conName	=	NULL;
+
+				foreach($this->tables as $key=>$table){
+
+					if(is_null($conName)){
+
+						$conName	=	$table->getConnectionId();	
+						continue;
+
+					}
+
+					//Different connections! Dump table into first table schema
+					if($table->getConnectionId()!==$conName){
+
+						//Make a copy of the table into the first connection schema
+						$table->copyTo($this->tables[$key-1]);
+
+					}
+
+				}
+
+				$db	=	\apf\db\Pool::getConnection($conName);
+				$stmt	=	$db->prepare($sql);
+			
+				if(!$stmt->execute()){
+
+					throw new \Exception("Error preparing query: $sql");
+
+				}
+
+				return $stmt;
 
 			}
 
