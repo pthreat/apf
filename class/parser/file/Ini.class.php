@@ -6,10 +6,80 @@
 
 			private	$_iniFile	=	NULL;
 			private	$_data		=	Array();
+			private	$_lines		=	Array();
 
 			public function __construct(\apf\core\File $file,$section=NULL){
 
 				$this->setFile($file,$section);
+
+			}
+
+			private function parseIniFile(){
+
+				$this->_iniFile->setReadFunction("fgets");
+				$lineNo =	0;
+					  
+				$arrayConfig    =   array();
+					  
+				while($line = $this->_iniFile->read()){
+
+					$lineNo++;
+					$line	=	trim($line);
+
+					if(empty($line)){
+						continue;
+					}
+
+					$isComment	=	strpos($line,';')===0;
+
+					if($isComment){
+						continue;
+					}
+
+					$comentarios = strpos($line,';');
+
+					if($comentarios===0){
+						continue;
+					}
+
+					$isSection	=	strpos($line,'[')===0;
+
+					if($isSection){
+
+						$section	=	substr($line,1,strpos($line,']')-1);
+						$arrayConfig[$section]	=	Array();
+						continue;
+
+					}
+
+					$param	=	trim(substr($line,0,strpos($line,'=')));
+					$value	=	trim(substr($line,strpos($line,'=')+1));
+					$hasComment	=	strpos($value,';');
+
+					if($hasComment){
+						$value	=	substr($value,0,$hasComment);
+					}
+
+					if(isset($section)){
+
+						$arrayConfig[$section][]	=	Array(
+																			"values"=>Array($param=>$value,"line"=>$lineNo)
+						);
+
+						continue;
+															
+					}
+
+					$arrayConfig[]	=	Array("values"=>Array($param=>$value),"line"=>$lineNo);
+
+				}
+
+				return $arrayConfig;
+
+			}
+
+			public function getLine($section,$param){
+
 
 			}
 

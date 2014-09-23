@@ -5,8 +5,10 @@
 		abstract class Query{
 
 			private		$tables			=	Array();
+			private		$tableCount		=	0;
 			private		$columns			=	Array();
 			private		$where			=	'';
+			private		$bound			=	Array();
 			protected	$query			=	Array(
 													 "where"		=>NULL,
 													 "having"	=>Array(),
@@ -157,48 +159,23 @@
 
 			}
 
-			public function where(Array $clause=Array()){
+			private function bindParams(Array $bindParams){
 
-				if(empty($clause)){
+				foreach($bindParams as $bind=>$value){
 
-					throw new \Exception("Where clause can't be empty");
-
-				}
-
-				$columns	=	array_keys($clause);
-
-				foreach($columns as $col){
-
-					$found	=	FALSE;
-
-					foreach($this->tables as $table){
-
-						$tmpCol	=	$table->getColumn($col);
-
-						if($tmpCol){
-
-							$found	=	TRUE;
-							$value	=	$clause[$col];
-							$col		=	$tmpCol;
-							break;
-
-						}
-
-					}
-
-					if(!$found){
-
-						throw new \Exception("No such column $col");
-
-					}
-
-					$col->setValue($value);
-					$this->where[]	=	$col;
+					$this->bound[$bind]	=	$value;
 
 				}
 
-				var_dump($this->where);
-				die();
+			}
+
+			public function where($clause=NULL,$bindParams=Array()){
+
+				$this->where	=	\apf\Validator::emptyString($clause,"Where clause can't be empty");
+
+				$this->bindParams($bindParams);
+
+				return $this;
 
 			}
 
@@ -210,7 +187,9 @@
 
 			public function addTable(\apf\db\Table $table){
 
-				$this->tables[]	=	$table;
+				$this->tableCount++;
+				$table->setAlias(sprintf("t%d",$this->tableCount));
+				$this->tables[$this->tableCount]	=	$table;
 
 			}
 
@@ -242,85 +221,6 @@
 				}
 
 				return $fields;
-
-			}
-
-			public function getColumn($column=NULL){
-
-				$column	=	\apf\Validator::emptyString($column,"Must provide column name");
-
-				foreach($this->table->getColumns() as $colName=>$colValue){
-
-					if($column==$colName){
-
-						return $colValue;
-
-					}
-
-				}
-
-				return Array();
-
-			}
-
-			private function validateFieldForTable($field,$setValue){
-
-				$found	=	FALSE;
-
-				if(!$found){
-
-					throw new \Exception("No such field $field for table ".$this->table);
-
-				}
-
-				switch($colValue["type"]){
-
-					case "int":
-
-						$value	=	(int)$setValue;
-
-						if(array_key_exists("unsigned",$colValue)&&$colValue["unsigned"]===TRUE&&$value<0){
-
-							$msg	=	"Column $colName is of type int unsigned, attempted to use ".
-										"$value as column value";
-
-							throw new \Exception($msg);
-							
-						}
-
-					break;
-
-					case "float":
-					case "double":
-
-						$value	=	(double)$setValue;
-
-						if(array_key_exists("unsigned",$colValue)&&$colValue["unsigned"]===TRUE&&$value<0){
-
-							$msg	=	"Column $colName is of type int unsigned, attempted to use ".
-										"$value as column value";
-
-							throw new \Exception($msg);
-							
-						}
-
-					break;
-
-					case "string":
-					default:
-
-						if(array_key_exists("maxlen",$colValue)&&strlen($setValue)>$colValue["maxlen"]){
-
-							$msg	=	"Column $colName is of type int unsigned, attempted to use ".
-										"$value as column value";
-
-							throw new \Exception($msg);
-							
-						}
-
-					break;
-
-				}
 
 			}
 
@@ -356,7 +256,36 @@
 
 				$db	=	\apf\db\Pool::getConnection($conName);
 				$stmt	=	$db->prepare($sql);
-			
+
+				foreach($this->bound as $value){
+
+					foreach($value as $bind=>$val){
+
+						$hasTable	=	strpos($bind,':');
+
+						if(!$hasTable){
+
+							$stmt->bindParam($bind,$val);
+
+						}
+
+						$table	=	substr($bind,0,$hasTable);
+						$tableNo	=	substr($bind,1,$hasTable-1);
+						$column	=	substr($bind,$hasTable+1);
+						$column	=	$this->tables[$tableNo]->getColumn($column);
+						$column->setValue($val);
+
+						$stmt->bindParam($bind,$val,constant($column->getPDOType()));
+
+					}
+
+				}
+
+				var_dump($stmt);
+				die();
+
+				$stmt->setFetchMode(\PDO::FETCH_ASSOC);
+
 				if(!$stmt->execute()){
 
 					throw new \Exception("Error preparing query: $sql");

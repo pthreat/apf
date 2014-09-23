@@ -123,7 +123,7 @@
 
 			public final function addColumn($name,$value){
 
-				$requiredKeys	=	Array("name","type","extra","key","charset","maxlen","octlen","null","pdo");
+				$requiredKeys	= ["name","type","extra","key","charset","maxlen","octlen","null","pdo_type","php_type"];
 				\apf\Validator::arrayKeys($requiredKeys,$value);
 				$this->columns[$name]	=	$value;
 
@@ -203,7 +203,7 @@
 
 			public function __toString(){
 
-				return (string)$this->getName();
+				return sprintf("%s",$this->getName());
 
 			}
 

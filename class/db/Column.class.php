@@ -20,12 +20,18 @@
 
 			public function __construct(Array $columnData){
 
-				$expectedKeys	=	Array("name","type");
+				$expectedKeys	=	Array("name","type","php_type","pdo_type");
 
 				\apf\Validator::arrayKeys($expectedKeys,$columnData);
 
 				$this->setName($columnData["name"]);
 				$this->setType($columnData["type"]);
+				$this->setPHPType($columnData["php_type"]);
+				$this->setPDOType($columnData["pdo_type"]);
+
+				if(isset($columnData["unsigned"])){
+					$this->setUnsigned($columnData["unsigned"]);
+				}
 
 				if(isset($columnData["table"])){
 
@@ -41,7 +47,7 @@
 
 				if(isset($columnData["maxlen"])){
 
-					$this->setMaxLen($columnData["maxlen"]);
+					$this->setMaxLength($columnData["maxlen"]);
 
 				}
 
@@ -52,6 +58,49 @@
 				}
 
 			}
+
+			public function setPHPType($type){
+
+				$type			=	\apf\Validator::emptyString($type,"PHP Type can't be empty");
+				$validTypes	=	["int","double","string"];
+
+				if(!in_array($type,$validTypes)){
+
+					throw new \Exception(sprintf("Invalid PHP type specified, PHP type must be one of %s",implode(',',$validTypes)));
+
+				}
+
+				$this->phpType	=	$type;
+
+			}
+
+			public function getPHPType(){
+
+				return $this->phpType;
+
+			}
+
+			public function setPDOType($type){
+
+				$type			=	\apf\Validator::emptyString($type,"PDO Type can't be empty");
+				$validTypes	=	["PDO::PARAM_STR","PDO::PARAM_LOB","PDO::PARAM_INT","PDO:PARAM_BOOL"];
+
+				if(!in_array($type,$validTypes)){
+
+					throw new \Exception(sprintf("Invalid PDO type specified, PDO type must be one of %s",implode(',',$validTypes)));
+
+				}
+
+				$this->pdoType	=	$type;
+
+			}
+
+			public function getPDOType(){
+
+				return $this->pdoType;
+
+			}
+
 
 			public function setName($name=NULL){
 
@@ -91,8 +140,52 @@
 
 			public function setValue($value=NULL){
 
-				//Validate value
-				$this->value	=	$value;
+				switch($this->phpType){
+
+					case "string":
+
+						if(!is_null($this->maxLen)&&strlen($value)>$this->maxLen){
+
+							throw new \Exception("Given value exceeds column length");
+
+						}
+
+						$this->value	=	$value;
+
+					break;
+
+					case "int":
+
+						if($this->isUnsigned&&$value<0){
+
+							throw new \Exception("Expected unsigned value");
+
+						}
+
+						$this->value	=	(int)$value;
+
+					break;
+
+					case "double":
+
+						if($this->isUnsigned&&$value<0){
+
+							throw new \Exception("Expected unsigned value");
+
+						}
+
+						$this->value	=	(double)$value;
+
+					break;
+
+					default:
+
+						throw new \Exception(sprintf("Unknown PHP type %s",$this->phpType));
+
+					break;
+
+				}
+
 
 			}
 
@@ -112,12 +205,6 @@
 			public function getMaxLength(){
 
 				return $this->maxLength;
-
-			}
-
-			public function getPDOType(){
-
-				return $this->pdoType;
 
 			}
 
@@ -157,32 +244,6 @@
 
 			}
 
-			public function setPHPType($type=NULL){
-
-				\apf\Validator::emptyString($type,"PHP Type can't be empty");
-
-				$validTypes	=	Array("int","string","double");
-
-				if(!in_array($type,$validTypes)){
-
-					$msg	=	"$type is not a valid PHP type, must choose". 
-								"one of ".implode(',',$validTypes);
-
-					throw new \Exception($msg);
-
-				}
-
-				$this->phpType	=	$type;
-
-
-			}
-
-			public function getPHPType(){
-
-				return $this->phpType;	
-
-			}
-
 			public function isPrimaryKey(){
 
 				return (boolean)$this->isPrimaryKey;
@@ -196,10 +257,21 @@
 			}
 
 			public function getCharset(){
+
 				return $this->charset;
+
+			}
+
+			public function __toString(){
+
+				$alias	=	$this->table->getAlias();
+				$alias	=	empty($alias)	?	''	:	".$alias";
+				return sprintf("%s%s",$alias,$this->name);
+
 			}
 
 		}
+
 	}
 
 ?>

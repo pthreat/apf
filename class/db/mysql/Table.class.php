@@ -63,12 +63,14 @@
 						case "integer":
 						case "serial":
 						case "bit":
-							$columns[$name]["pdo"]			=	"PDO::PARAM_INT";
 							$columns[$name]["unsigned"]	=	(boolean)preg_match("/unsigned/",$column["COLUMN_TYPE"]);
+							$columns[$name]["php_type"]	=	"int";
+							$columns[$name]["pdo_type"]	=	"PDO::PARAM_INT";
 						break;
 
 						case "boolean":
-							$columns[$name]["pdo"]	=	"PDO::PARAM_BOOL";
+							$columns[$name]["php_type"]	=	"boolean";
+							$columns[$name]["pdo_type"]	=	"PDO::PARAM_BOOL";
 						break;
 
 						case "tinytext":
@@ -76,13 +78,18 @@
 						case "text":
 						case "longblob":
 						case "blob":
-							$columns[$name]["pdo"]	=	"PDO::PARAM_LOB";
+							$columns[$name]["php_type"]	=	"string";
+							$columns[$name]["pdo_type"]	=	"PDO::PARAM_LOB";
 						break;
 
 						case "dec":
 						case "float":
 						case "double":
 						case "decimal":
+							$columns[$name]["php_type"]	=	"double";
+							$columns[$name]["pdo_type"]	=	"PDO::PARAM_STR";
+						break;
+
 						case "date":
 						case "datetime":
 						case "year":
@@ -91,7 +98,8 @@
 						case "char":
 						case "enum":
 						default:
-							$columns[$name]["pdo"]	=	"PDO::PARAM_STR";
+							$columns[$name]["pdo_type"]	=	"PDO::PARAM_STR";
+							$columns[$name]["php_type"]	=	"string";
 						break;
 
 					}

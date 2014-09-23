@@ -27,11 +27,9 @@
 
 				$where	=	$this->getWhere();
 
+				if($where){
 
-				if(sizeof($this->getWhere())){
-
-					$where	=	$this->getWhere()["string"];
-					$sql		=	sprintf("%s WHERE %s",$sql,$this->getWhere()["string"]);
+					$sql	=	sprintf("%s WHERE %s",$sql,$where);
 
 				}
 
