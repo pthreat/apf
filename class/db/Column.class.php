@@ -95,9 +95,15 @@
 
 			}
 
-			public function getPDOType(){
+			public function getPDOType($asString=FALSE){
 
-				return $this->pdoType;
+				if($asString){
+
+					return $this->pdoType;
+
+				}
+
+				return constant($this->pdoType);
 
 			}
 

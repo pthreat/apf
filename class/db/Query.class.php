@@ -6,25 +6,11 @@
 
 			private		$tables			=	Array();
 			private		$tableCount		=	0;
-			private		$columns			=	Array();
-			private		$where			=	'';
-			private		$bound			=	Array();
-			protected	$query			=	Array(
-													 "where"		=>NULL,
-													 "having"	=>Array(),
-													 "group"		=>Array(),
-													 "order"		=>Array(),
-													 "limit"		=>Array(),
-													 "offset"	=>NULL,
-													 "union"		=>NULL,
-													 "join"		=>Array()
-			);
+			private		$bind				=	Array();
 
 			abstract public function getSQL();
 
-			public final function __construct($tables=NULL,$columns=NULL){
-
-				$this->setColumns($columns);
+			public final function __construct($tables=NULL){
 
 				$amountOfConnections	=	\apf\db\Pool::getConnectionCount();
 
@@ -153,35 +139,13 @@
 
 			}
 
-			protected function getWhere(){
-
-				return $this->where;
-
-			}
-
-			private function bindParams(Array $bindParams){
+			protected function bindParams(Array $bindParams){
 
 				foreach($bindParams as $bind=>$value){
 
-					$this->bound[$bind]	=	$value;
+					$this->bind[$bind]	=	$value;
 
 				}
-
-			}
-
-			public function where($clause=NULL,$bindParams=Array()){
-
-				$this->where	=	\apf\Validator::emptyString($clause,"Where clause can't be empty");
-
-				$this->bindParams($bindParams);
-
-				return $this;
-
-			}
-
-			public function setColumns($columns=NULL){
-
-				$this->columns	=	$columns;
 
 			}
 
@@ -193,49 +157,105 @@
 
 			}
 
-			public function addField($field,$setValue,$escape="PDO::PARAM_STR"){
-
-				if(is_null($this->tables)){
-
-					$this->query["fields"][]	=	Array(
-																	"field"	=>	$var,
-																	"value"	=>	$setValue,
-																	"pdo"		=>	$escape
-					);
-
-					return;	
-
-				}
-
-
-			}
-
-			public function getFieldsFromAllTables(){
-
-				$fields	=	Array();
-
-				foreach($this->tables as $table){
-
-					$fields[]	=	$table->getColumns();	
-
-				}
-
-				return $fields;
-
-			}
-
 			public function getTables(){
 
 				return $this->tables;
 
 			}
 
+			public function getTableWithIndex($index){
+
+				$index	=	(int)$index;
+
+				if(!isset($this->tables[$index])){
+					return FALSE;
+				}
+
+				return $this->tables[$index];
+			}
+
+			protected function parseQuery(&$sql){
+
+				$hasBracket	=	strpos($sql,'[');
+
+				if($hasBracket===FALSE){
+					return;
+				}
+
+				$count	=	0;
+
+				while($openingBracket=strpos($sql,'[')){
+
+					$count++;
+
+					$tmp					=	substr($sql,$openingBracket+1);
+					$closingBracket	=	strpos($tmp,']');
+
+					if($closingBracket===FALSE){
+
+						throw new \Exception("Missing closing ]");
+
+					}
+
+					$tmp		=	substr($tmp,0,$closingBracket);
+					$dotPos	=	strpos($tmp,'.');
+					$column	=	substr($tmp,$dotPos+1);
+
+					$eqPos	=	strpos($column,'=');
+
+					if(!($eqPos===FALSE)){
+
+						$value	=	substr($column,$eqPos+1);
+						$column	=	substr($column,0,$eqPos);
+
+					}
+
+					if($dotPos===FALSE){
+
+						throw new \Exception("Syntax error, expecting \".\"");
+
+					}
+
+					$table	=	substr($tmp,0,$dotPos);
+					$tableNo	=	substr($table,1);
+
+					if(!isset($this->tables[$tableNo])){
+
+						throw new \Exception("No such table: $tableNo");
+
+					}
+
+					$table	=	$this->tables[$tableNo];
+
+					$colObj	=	$table->getColumn($column);
+
+					if(!$colObj){
+
+						throw new \Exception("No such column $column in table $table");
+
+					}
+
+					if(isset($value)){
+
+						$colObj->setValue($value);
+
+					}
+
+					$bind	=	sprintf(":%s_%s_%d",$table,$column,$count);
+					$sql	=	preg_replace("/\[$tmp\]/",$bind,$sql);
+					$this->bind[$bind]	=	$colObj;
+
+				}
+
+			}
+
 			public function run($smart=TRUE){
 
 				$sql		=	$this->getSQL();
+				$this->parseQuery($sql);
 				$conName	=	NULL;
 
-				foreach($this->tables as $key=>$table){
+				foreach($this->getTables() as $key=>$table){
 
 					if(is_null($conName)){
 
@@ -248,7 +268,7 @@
 					if($table->getConnectionId()!==$conName){
 
 						//Make a copy of the table into the first connection schema
-						$table->copyTo($this->tables[$key-1]);
+						$table->copyTo($this->getTableWithIndex($key-1));
 
 					}
 
@@ -257,32 +277,11 @@
 				$db	=	\apf\db\Pool::getConnection($conName);
 				$stmt	=	$db->prepare($sql);
 
-				foreach($this->bound as $value){
+				foreach($this->bind as $bindName=>$column){
 
-					foreach($value as $bind=>$val){
-
-						$hasTable	=	strpos($bind,':');
-
-						if(!$hasTable){
-
-							$stmt->bindParam($bind,$val);
-
-						}
-
-						$table	=	substr($bind,0,$hasTable);
-						$tableNo	=	substr($bind,1,$hasTable-1);
-						$column	=	substr($bind,$hasTable+1);
-						$column	=	$this->tables[$tableNo]->getColumn($column);
-						$column->setValue($val);
-
-						$stmt->bindParam($bind,$val,constant($column->getPDOType()));
-
-					}
+					$stmt->bindParam($bindName,$column->getValue(),$column->getPDOType());	
 
 				}
-
-				var_dump($stmt);
-				die();
 
 				$stmt->setFetchMode(\PDO::FETCH_ASSOC);
 
@@ -296,36 +295,6 @@
 
 			}
 
-			public function __set($var,$value){
-
-				$this->addField($var,$value);
-
-			}
-
-			public final function getColumns(){
-
-				if(sizeof($this->columns)){
-
-					return $this->columns;
-
-				}
-
-				foreach($this->tables as $table){
-
-					$alias	=	$table->getAlias();
-					$columns	=	Array();
-
-					foreach($table->getColumns() as $col){
-
-						$columns[]	=	$alias	?	$alias.'.'.$col["name"]	:	$col["name"];
-
-					}
-
-					return $columns;
-
-				}
-
-			}
 
 		}
 

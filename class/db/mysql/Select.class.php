@@ -6,7 +6,7 @@
 
 	namespace apf\db\mysql{
 
-		class Select extends Query{
+		class Select extends \apf\db\DMLQuery{
 
 			public function getSQL(){
 
@@ -16,7 +16,13 @@
 				$tables	=	Array();
 
 				foreach($this->getTables() as $table){
-					$tables[]=sprintf("%s",$table);
+
+					if($table->getAlias()){
+						$tables[]=sprintf("%s AS %s",$table,$table->getAlias());
+					}else{
+						$tables[]=sprintf("%s",$table);
+					}
+
 				}
 
 				if(!empty($tables)){
@@ -30,6 +36,30 @@
 				if($where){
 
 					$sql	=	sprintf("%s WHERE %s",$sql,$where);
+
+				}
+
+				$group	=	$this->getGroup();
+
+				if($group){
+
+					$sql	=	sprintf("%s GROUP BY %s",$sql,$group);
+
+				}
+
+				$having	=	$this->getHaving();
+
+				if($having){
+
+					$sql	=	sprintf("%s HAVING %s",$sql,$having);
+
+				}
+
+				$order	=	$this->getOrder();
+
+				if($order){
+
+					$sql	=	sprintf("%s ORDER BY %s %s",$sql,$order["fields"],$order["sort"]);
 
 				}
 

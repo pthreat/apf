@@ -8,9 +8,13 @@
 			private	$_data		=	Array();
 			private	$_lines		=	Array();
 
-			public function __construct(\apf\core\File $file,$section=NULL){
+			public function __construct($file=NULL,$section=NULL){
 
-				$this->setFile($file,$section);
+				if(!is_null($file)){
+
+					$this->setFile($file,$section);
+
+				}
 
 			}
 
@@ -60,10 +64,12 @@
 						$value	=	substr($value,0,$hasComment);
 					}
 
+					$value	=	trim($value,'"');
+
 					if(isset($section)){
 
 						$arrayConfig[$section][]	=	Array(
-																			"values"=>Array($param=>$value,"line"=>$lineNo)
+																			"values"=>Array($param=>$value),"line"=>$lineNo
 						);
 
 						continue;
@@ -83,9 +89,32 @@
 
 			}
 
-			public function setFile(\apf\core\File $file,$section){
+			public function setFile($file=NULL,$section){
+
+				if(empty($file)&&!is_string($file)&&!($file instanceof \apf\core\File)){
+			
+					$msg	=	"file argument should be an instance of ".
+								"\\apf\\core\\File or a string containing ".
+								"the path to the ini file";
+
+					throw new \Exception($msg);
+
+				}
+
+
+				if($file instanceof \apf\core\File){
+
+					$this->_iniFile	=	$file;
+
+				}elseif(is_string($file)){
+
+					$this->_iniFile	=	new \apf\core\File($file);
+
+				}
+
 	
-				$this->_data	=	parse_ini_file($file,TRUE);
+				//$this->_data	=	parse_ini_file($this->_iniFile,TRUE);
+				$this->_data	=	$this->parseinifile($this->_iniFile,TRUE);
 
 				foreach($this->_data as $k=>$v){
 
@@ -95,19 +124,17 @@
 							continue;
 						}
 
-						foreach($v as $key=>$val){
-
-							$this->$key=$val;
-
-						}
-
 					}
 
 					$this->$k	=	new \StdClass();
 
 					foreach($v as $key=>$val){
 
-						$this->$k->$key=$val;
+						foreach($val["values"] as $param=>$pValue){
+
+							$this->$k->$param=$pValue;
+
+						}
 
 					}
 
