@@ -4,19 +4,25 @@
 
 		abstract class DMLQuery extends Query{
 
-			private		$columns	=	Array();
-			private		$where	=	'';
-			private		$having	=	'';
-			private		$group	=	'';
-			private		$order	=	Array();
+			private	$columns	=	Array();
+			private	$where	=	'';
+			private	$having	=	'';
+			private	$group	=	'';
+			private	$order	=	Array();
 
-			public function where($clause=NULL,$bindParams=Array()){
+			public function where($clause=NULL){
 
 				$this->where	=	\apf\Validator::emptyString($clause,"Where clause can't be empty");
 
-				$this->bindParams($bindParams);
+				//$this->bindParams($bindParams);
 
 				return $this;
+
+			}
+
+			public function having($clause){
+
+				$this->having	=	\apf\Validator::emptyString($clause,"Where clause can't be empty");
 
 			}
 
@@ -29,6 +35,12 @@
 			public final function getGroup(){
 
 				return $this->group;
+
+			}
+
+			public function order($field,$sort="ASC"){
+
+				$this->order	=	Array("field"=>$field,"sort"=>$sort);
 
 			}
 

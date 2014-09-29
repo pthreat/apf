@@ -4,9 +4,9 @@
 
 		class Ini{
 
-			private	$_iniFile	=	NULL;
-			private	$_data		=	Array();
-			private	$_lines		=	Array();
+			private	$iniFile	=	NULL;
+			private	$data		=	Array();
+			private	$lines	=	Array();
 
 			public function __construct($file=NULL,$section=NULL){
 
@@ -20,12 +20,12 @@
 
 			private function parseIniFile(){
 
-				$this->_iniFile->setReadFunction("fgets");
+				$this->iniFile->setReadFunction("fgets");
 				$lineNo =	0;
 					  
 				$arrayConfig    =   array();
 					  
-				while($line = $this->_iniFile->read()){
+				while($line = $this->iniFile->read()){
 
 					$lineNo++;
 					$line	=	trim($line);
@@ -50,14 +50,16 @@
 
 					if($isSection){
 
+
 						$section	=	substr($line,1,strpos($line,']')-1);
-						$arrayConfig[$section]	=	Array();
+						$arrayConfig[$section]				=	Array();
+						$this->lines[$section]["line"]	=	$lineNo;
 						continue;
 
 					}
 
-					$param	=	trim(substr($line,0,strpos($line,'=')));
-					$value	=	trim(substr($line,strpos($line,'=')+1));
+					$param		=	trim(substr($line,0,strpos($line,'=')));
+					$value		=	trim(substr($line,strpos($line,'=')+1));
 					$hasComment	=	strpos($value,';');
 
 					if($hasComment){
@@ -68,15 +70,15 @@
 
 					if(isset($section)){
 
-						$arrayConfig[$section][]	=	Array(
-																			"values"=>Array($param=>$value),"line"=>$lineNo
-						);
+						$this->lines[$section]["params"][$param]	=	$lineNo;
+						$arrayConfig[$section][$param]				=	$value;
 
 						continue;
 															
 					}
 
-					$arrayConfig[]	=	Array("values"=>Array($param=>$value),"line"=>$lineNo);
+					$this->lines["params"][$param]	=	$lineNo;
+					$arrayConfig[$param]					=	$value;
 
 				}
 
@@ -84,8 +86,27 @@
 
 			}
 
-			public function getLine($section,$param){
+			public function getLine($section,$param=NULL){
 
+				if(!isset($this->lines[$section])){
+
+					throw new \Exception("Unknown section $secion");
+
+				}
+
+				if(is_null($param)){
+
+					return $this->lines[$section]["line"];
+
+				}
+
+				if(!isset($this->lines[$section]["params"][$param])){
+
+					throw new \Exception("Unknown parameter \"$param\" for section \"$section\"");
+
+				}
+
+				return $this->lines[$section]["params"][$param];
 
 			}
 
@@ -104,19 +125,17 @@
 
 				if($file instanceof \apf\core\File){
 
-					$this->_iniFile	=	$file;
+					$this->iniFile	=	$file;
 
 				}elseif(is_string($file)){
 
-					$this->_iniFile	=	new \apf\core\File($file);
+					$this->iniFile	=	new \apf\core\File($file);
 
 				}
 
-	
-				//$this->_data	=	parse_ini_file($this->_iniFile,TRUE);
-				$this->_data	=	$this->parseinifile($this->_iniFile,TRUE);
+				$this->data	=	$this->parseinifile($this->iniFile,TRUE);
 
-				foreach($this->_data as $k=>$v){
+				foreach($this->data as $k=>$v){
 
 					if(!is_null($section)){
 
@@ -130,11 +149,7 @@
 
 					foreach($v as $key=>$val){
 
-						foreach($val["values"] as $param=>$pValue){
-
-							$this->$k->$param=$pValue;
-
-						}
+						$this->$k->$key	=	$val;
 
 					}
 
