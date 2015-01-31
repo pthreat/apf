@@ -26,6 +26,13 @@
 
 			}
 
+			public static function cast($num,$precision=2){
+
+				$precision	=	sprintf("%.$precision%s",'lf');
+				return sprintf($precision,$num);
+
+			}
+
 		}
 
 	}

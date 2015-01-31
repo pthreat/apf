@@ -24,6 +24,11 @@
 
 				$this->value	=	$value;
 
+			}
+
+			public static function cast($num){
+
+				return (int)$num;
 
 			}
 

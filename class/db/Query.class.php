@@ -163,7 +163,7 @@
 
 			}
 
-			public function getTableWithIndex($index){
+			public function getTableByIndex($index){
 
 				$index	=	(int)$index;
 
@@ -249,52 +249,9 @@
 
 			}
 
-			public function run($smart=TRUE){
-
-				$sql		=	$this->getSQL();
-				$this->parseQuery($sql);
-				$conName	=	NULL;
-
-				foreach($this->getTables() as $key=>$table){
-
-					if(is_null($conName)){
-
-						$conName	=	$table->getConnectionId();	
-						continue;
-
-					}
-
-					//Different connections! Dump table into first table schema
-					if($table->getConnectionId()!==$conName){
-
-						//Make a copy of the table into the first connection schema
-						$table->copyTo($this->getTableWithIndex($key-1));
-
-					}
-
-				}
-
-				$db	=	\apf\db\Pool::getConnection($conName);
-				$stmt	=	$db->prepare($sql);
-
-				foreach($this->bind as $bindName=>$column){
-
-					$stmt->bindParam($bindName,$column->getValue(),$column->getPDOType());	
-
-				}
-
-				$stmt->setFetchMode(\PDO::FETCH_ASSOC);
-
-				if(!$stmt->execute()){
-
-					throw new \Exception("Error preparing query: $sql");
-
-				}
-
-				return $stmt;
-
+			protected function getBoundParams(){
+				return $this->bind;
 			}
-
 
 		}
 

@@ -4,11 +4,21 @@
 
 		trait Type{
 
-			use AutoCall;
-
 			protected $value	=	NULL;
 
 			abstract public function __construct($value='',$cast=FALSE);
+
+			public function set($value=NULL){
+
+				$this->value	=	$value;
+
+			}
+
+			public function get(){
+
+				return $this->value;
+
+			}
 
 
 			public function getValue(){

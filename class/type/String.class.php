@@ -12,16 +12,23 @@
 
 				if(!$cast&&!$isString){
 
-					throw(new \Exception("Expected value must be of type string, ".gettype($value)." given"));
+					throw new \Exception("Expected value must be of type string, ".gettype($value)." given");
 
 				}
+
 				if($cast&&!$isString($value)){
 
-					return $this->value	=	(string)$value;
+					return $this->value	=	self::cast($value);
 
 				}
 
 				$this->value	=	$value;
+
+			}
+
+			public static function cast($val){
+
+				return strval($val);
 
 			}
 

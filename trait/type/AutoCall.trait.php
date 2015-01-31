@@ -21,10 +21,8 @@
 			public function __call($func,$params){
 
 				array_unshift($params,$this->value);
-				var_dump($params);
-				$return	=	call_user_func_array($func,$params);
-
-				return $return;
+				$this->value	=	call_user_func_array($func,$params);
+				return $this;
 
 			}
 

@@ -2,6 +2,16 @@
 
 	namespace apf\core{
 
+		set_error_handler(function ($errno, $errstr, $errfile, $errline ) {
+
+			if (!(error_reporting() & $errno)) {
+				return;
+			}
+
+			throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+
+		});
+
 		class Boot{
 
 			private static $paths			=	Array();

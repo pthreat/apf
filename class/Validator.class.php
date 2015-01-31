@@ -28,6 +28,18 @@
 					
 			}
 
+			public function classExists($className){
+
+				if(!class_exists($className)){
+
+					throw new \Exception("Unexistent class $className");
+
+				}
+
+				return TRUE;
+
+			}
+
 			public static function emptyString($string=NULL,$msg=NULL){
 
 				$string	=	trim($string);
