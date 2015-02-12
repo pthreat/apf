@@ -3,9 +3,9 @@
 	/**
 	*This class is part of Apollo PHP Framework.
 	*
-	*Namespace	:	apf\validate
-	*Class		:	Ip
-	*Description:	A class used to validate ip addresses, version 6 and version 4 or both.
+	*Namespace	:	apf\validate\fluent
+	*Class		:	Instance
+	*Description:	A class used to fluently validate a class
 	*
 	*Author		:	Federico Stange <jpfstange@gmail.com>
 	*License		:	3 clause BSD
@@ -38,59 +38,16 @@
 	*OF SUCH DAMAGE.
 	*
 	*/
-	namespace apf\validate{
 
-		class IP{
+	namespace apf\validate\fluent{
 
-			public static function version4($ip,$msg=NULL,$exCode=0){
+		class Class_{
 
-				$validIpv4	=	filter_var($ip,FILTER_VALIDATE_IP,FILTER_FLAG_IPV4);
+			use \apf\traits\validate\Fluent;
 
-				if($validIpv4){
+			public function __construct($value){
 
-					return TRUE;
-
-				}
-
-				$msg	=	empty($msg)	?	"Invalid IPV4 address" : $msg;
-
-				throw new \apf\exception\Validate($msg,$exCode);
-
-			}
-
-			public static function version6($ip,$msg=NULL,$exCode=0){
-
-				$validIpv6	=	filter_var($ip,FILTER_VALIDATE_IP,FILTER_FLAG_IPV6);
-
-				if($validIpv6){
-
-					return TRUE;
-
-				}
-
-				$msg	=	empty($msg)	?	"Invalid IPV6 address" : $msg;
-
-				throw new \apf\exception\Validate($msg,$exCode);
-
-			}
-
-			public function address($ip,$msg=NULL,$exCode=0){
-
-				if(self::version4($ip,$msg,$exCode){
-
-					return TRUE;
-
-				}
-
-				if(self::version6($ip,$msg,$exCode)){
-
-					return TRUE;
-
-				}
-
-				$msg	=	empty($msg)	?	"Invalid IP address" : $msg;
-
-				throw new \apf\exception\Validate($msg,$exCode);
+				$this->value	=	$value;
 
 			}
 

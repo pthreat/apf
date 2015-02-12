@@ -20,7 +20,7 @@
 
 			public static function getByIp($ip=NULL){
 
-				\apf\Validator::emptyString("IP address can't be empty");
+				\apf\validate\String::mustBeNotEmpty("IP address can't be empty");
 
 				if(!ip2long($ip)){
 

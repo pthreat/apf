@@ -44,25 +44,117 @@
 
 		class Vector{
 
-			public static function mustHavekeys(Array $array,Array $requiredKeys,$msg=NULL,$exCode=0){
+			/**
+			*Validates that an Array has EXACTLY a set of keys.
+			*@param Array $requiredKeys these is an array containing the keys an array should have
+			*@param Array $array Array to validate
+			*@param String $msg A message used to throw an exception if the condition is not met.
+			*@param Int $exCode integer code to throw an exception if the condition is not met.
+			*@throws \apf\exception\Validate In case the array lacks a given key (CODE: -1)
+			*@throws \apf\exception\Validate In case the array contains EXTRA elements (CODE:$exCode)
+			*/
 
-				foreach($requiredKeys as $k){
+			public static function mustHaveExactlyTheseKeys(Array $requiredKeys,Array $array,$msg=NULL,$exCode=0){
 
-					if(!array_key_exists($k,$array)){
+				self::mustHaveKeys($requiredKeys,$array,$msg,-1);
 
-						$msg	=	empty($msg)	?	"Required array key $k, doesn't exists in given array" : $msg;
-						throw new \Exception($msg);
+				$keys	=	array_keys($array);
+				$diff	=	array_diff($keys,$requiredKeys);
 
-						return $k;
+				if($diff){
 
+					$msg	=	empty($msg)	?	sprintf('Array contains extra keys: %s',implode(',',$diff))	:	$msg;
 
-					}
+					throw new \apf\exception\Validate($msg,$exCode);
+					
+				}
+
+			}
+
+			/**
+			*Validates that an Array has a set of keys.
+			*WARNING: This method does NOT validate if the array contains EXTRA keys
+			*If you'd like a stricter validation please use: mustHaveExactlyTheseKeys
+			*@param Array $requiredKeys this is an array containing the keys an array should have
+			*@param Array $array Array to validate
+			*@param String $msg A message used to throw an exception if the condition is not met.
+			*@param Int $exCode integer code to throw an exception if the condition is not met.
+			*@throws \apf\exception\Validate In case the array lacks a given key (CODE: -1)
+			*@throws \apf\exception\Validate In case the array contains EXTRA elements (CODE:$exCode)
+			*@see self::mustHaveExactlyTheseKeys
+			*/
+
+			public static function mustHaveKeys(Array $requiredKeys,Array &$array,$msg=NULL,$exCode=0){
+
+				$msg	=	empty($msg)	?	'Required array key "%s", doesn\'t exists in given array' : $msg;
+
+				array_walk($requiredKeys,function($key,&$val) use (&$array,$msg,$exCode){
+
+					self::mustHaveKey($key,$array,sprintf($msg,$key),$exCode);
+
+				});
+
+			}
+
+			/**
+			*Validates that an array has a given key (boolean way)
+			*This is just an alias of array_key_exists, but it adds a bit of code clarity
+			*and is provided for completion.
+			*
+			*@param String $key Key to be checked if it exists in the array
+			*@param Array $array arra to be checked if it contains a key specified in $key
+			*@return boolean TRUE The key $key exists
+			*@return boolean FALSE The key $key doesn't exists
+			*/
+
+			public static function hasKey($key,Array $array){
+
+				return array_key_exists($key,$array);
+
+			}
+
+			/**
+			*Validates that an array has a key in an imperative way
+			*@param String $key Key to check if it exists in the array
+			*@param Array $array Array to be checked
+			*@param String $msg A message used to throw an exception if the condition is not met.
+			*@param Int $exCode integer code to throw an exception if the condition is not met.
+			*@throws \apf\exception\Validate In case the array lacks of the specified key $key
+			*/
+
+			public static function mustHaveKey($key,Array $array,$msg=NULL,$exCode=0){
+
+				if(!self::hasKey($key,$array)){
+
+					$msg	=	empty($msg)	?	"Array doesn't has a key named $key"	:	$msg;
+					throw new \apf\exception\Validate($msg,$exCode);
 
 				}
 
-				return TRUE;
-					
 			}
+
+			/**
+			*Validates that an array has a given key (boolean way)
+			*This is just an alias of the "empty" function, but it adds a bit of code clarity
+			*and is provided for completion.
+			*@param Array $array array to be checked if is empty.
+			*@return boolean TRUE The array is empty.
+			*@return boolean FALSE The array is not empty.
+			*/
+
+			public static function isEmpty(Array $array){
+
+				return empty($array);
+
+			}
+
+			/**
+			*Validates that an Array MUST be empty (imperative way)
+			*@param Array $array Array to validate
+			*@param String $msg A message used to throw an exception if the condition is not met.
+			*@param Int $exCode integer code to throw an exception if the condition is not met.
+			*@throws \apf\exception\Validate In case the array is not empty.
+			*/
 
 			public static function mustBeEmpty(Array $array,$msg=NULL,$exCode=0){
 
@@ -74,16 +166,24 @@
 
 				$msg	=	empty($msg)	?	"Array is not empty"	:	$msg;
 
-				throw new \Exception($msg,$exCode);
+				throw new \apf\exception\Validate($msg,$exCode);
 
 			}
+
+			/**
+			*Validates that an Array MUST NOT be empty (imperative way)
+			*@param Array $array Array to validate
+			*@param String $msg A message used to throw an exception if the condition is not met.
+			*@param Int $exCode integer code to throw an exception if the condition is not met.
+			*@throws \apf\exception\Validate In case the array IS EMPTY.
+			*/
 
 			public static function mustBeNotEmpty(Array $array,$msg=NULL,$exCode=0){
 
 				if(empty($array)){
 
 					$msg	=	empty($msg) ? "Array must be not empty"	:	$msg;
-					throw new \Exception($msg,$exCode);
+					throw new \apf\exception\Validate($msg,$exCode);
 
 				}
 

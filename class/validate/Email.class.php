@@ -48,9 +48,9 @@
 			*Validates an email address
 			*@param String $email the email address to be validated
 			*@param String $msg Message if an exception ocurrs
-			*@param Int    $exCode Exception code
-			*@throws \Exception if the given email String is empty (with exception code -1)
-			*@throws \Exception if the given email String is not a valid email (with code $exCode)
+			*@param Int    $exCode \apf\exception\Validate code
+			*@throws \apf\exception\Validate if the given email String is empty (with exception code -1)
+			*@throws \apf\exception\Validate if the given email String is not a valid email (with code $exCode)
 			*/
 
 			public static function address($email,$msg=0,$exCode=0){
@@ -61,7 +61,7 @@
 
 					$msg  =	empty($msg)	?	"Invalid Email"	:	$msg;
 
-					throw new \Exception($msg);
+					throw new \apf\exception\Validate($msg);
 
 				}
 
@@ -79,7 +79,7 @@
 				if($addressDomain!==$domain){
 
 					$msg	=	empty($msg)	?	"Domain $addressDomain doesn't matches with domain $domain" : $msg;
-					throw new \Exception($msg);
+					throw new \apf\exception\Validate($msg);
 
 				}
 
@@ -109,7 +109,7 @@
 
 				$msg	=	empty($msg)	?	sprintf('Email domain doesn\'t matches with any of the domains listed: %s',implode(',',$domains);
 
-				throw new \Exception($msg,$exCode);
+				throw new \apf\exception\Validate($msg,$exCode);
 
 			}
 

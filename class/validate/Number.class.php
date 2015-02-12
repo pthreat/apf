@@ -52,17 +52,70 @@
 
 			}
 
+			/**
+			*Check if a number is odd
+			*@param mixed $val Number/String to check
+			*@return boolean TRUE the number is odd
+			*@return boolean FALSE the number is even
+			*/
+
+			public static function isOdd($num){
+
+				$num	=	self::cast($num);
+				return !(boolean)($num%2);
+
+			}
 
 			/**
-			*Check if a number is positive.
+			*Check if a number is even
 			*@param mixed $val Number/String to check
+			*@return boolean TRUE the number is even
+			*@return boolean FALSE the number is odd
+			*/
+
+			public static function isEven($num){
+
+				$num	=	self::cast($num);
+				return (boolean)($num%2);
+
+			}
+
+			/**
+			*Check if a number is positive
+			*@param mixed $num Could be a numeric string or an integer
+			*@return boolean TRUE is positive
+			*@return boolean FALSE is not positive
+			*/
+
+			public static function isPositive($num){
+
+				return !(self::cast($num) <= 0);
+
+			}
+
+			/**
+			*Check if a number is negative
+			*@param mixed $num Could be a numeric string or an integer
+			*@return boolean TRUE is negative
+			*@return boolean FALSE is not negative
+			*/
+
+			public static function isNegative($num){
+
+				return !self::isPositive($num);
+
+			}
+
+			/**
+			*Check if a number is positive (imperative mode).
+			*@param mixed $num Number/String to check
 			*@param String $msg A message to be shown in case an exception is thrown
 			*@param int $exCode A code to be added in case an exception is thrown
-			*@throws Exception If the number is not positive
+			*@throws \apf\exception\Validate If the number is not positive
 			*@return number Entered number casted to the given type
 			*/
 
-			public static function mustBePositive($num,$msg,$exCode=0){
+			public static function mustBePositive($num,$msg=NULL,$exCode=0){
 
 				$num	=	self::cast($num);
 
@@ -70,7 +123,7 @@
 
 					$msg	=	empty($msg)	?	"Given number is not positive" : $msg;
 
-					throw new \Exception($msg,$exCode);
+					throw new \apf\exception\Validate($msg,$exCode);
 
 				}
 
@@ -79,37 +132,51 @@
 			}
 
 			/**
-			*Check if a number is negative.
+			*Check if a number is negative (imperative mode).
 			*@param mixed $val Number/String to check
 			*@param String $msg A message to be shown in case an exception is thrown
 			*@param int $exCode A code to be added in case an exception is thrown
-			*@throws Exception If the number is not negative
+			*@throws \apf\exception\Validate If the number is not negative
 			*@return number Entered number casted to the given type
 			*/
 
 			public static function mustBeNegative($num,$msg=NULL,$exCode=0){
 
-				$num	=	static::cast($num);
+				$num	=	self::cast($num);
 
 				if($num>=0){
 
 					$msg	=	empty($msg)	?	"Given number is not negative" : $msg;
 
-					throw new \Exception($msg,$exCode);
+					throw new \apf\exception\Validate($msg,$exCode);
 
 				}
-
-				return $num;
 
 			}
 
 			/**
-			*Check if a number is greater than another number
+			*Check if a number is greater than another number (imperative mode)
 			*@param mixed $cmp Base number
 			*@param mixed $num Number to be compared
 			*@param String $msg A message to be shown in case an exception is thrown
 			*@param int $exCode A code to be added in case an exception is thrown
-			*@throws Exception If $num is not greater than $cmp
+			*@throws \apf\exception\Validate If $num is not greater than $cmp
+			*@return number Entered number casted to the given type
+			*/
+
+			public static function isGreatherThan($num,$cmp){
+
+				return $num>$cmp;
+
+			}
+
+			/**
+			*Check if a number is greater than another number (imperative mode)
+			*@param mixed $cmp Base number
+			*@param mixed $num Number to be compared
+			*@param String $msg A message to be shown in case an exception is thrown
+			*@param int $exCode A code to be added in case an exception is thrown
+			*@throws \apf\exception\Validate If $num is not greater than $cmp
 			*@return number Entered number casted to the given type
 			*/
 
@@ -126,7 +193,7 @@
 
 				$msg	=	empty($msg)	?	"Number $num is not greater than $cmp"	:	$msg;
 
-				throw new \Exception($msg);
+				throw new \apf\exception\Validate($msg);
 
 			}
 
@@ -136,7 +203,7 @@
 			*@param mixed $num Number to be compared
 			*@param String $msg A message to be shown in case an exception is thrown
 			*@param int $exCode A code to be added in case an exception is thrown
-			*@throws Exception If $num is not greater than $cmp
+			*@throws \apf\exception\Validate If $num is not greater than $cmp
 			*@return number Entered number casted to the given type
 			*/
 
@@ -153,7 +220,7 @@
 
 				$msg	=	empty($msg)	?	"Number $num is not greater or equal to $cmp"	:	$msg;
 
-				throw new \Exception($msg);
+				throw new \apf\exception\Validate($msg);
 
 			}
 
@@ -165,7 +232,7 @@
 			*@param String $msg A message to be shown in case an exception is thrown
 			*@param int $exCode A code to be added in case an exception is thrown
 			*@return mixed Number casted to the proper type
-			*@throws \Exception $num is not lower than $cmp
+			*@throws \apf\exception\Validate $num is not lower than $cmp
 			*/
 
 			public function mustBeLowerThan($num,$cmp,$msg=NULL,$exCode=0){
@@ -181,7 +248,7 @@
 
 				$msg	=	empty($msg)	?	"Number $num is not lower than $cmp"	:	$msg;
 
-				throw new \Exception($msg);
+				throw new \apf\exception\Validate($msg);
 
 			}
 
@@ -193,7 +260,7 @@
 			*@param String $msg A message to be shown in case an exception is thrown
 			*@param int $exCode A code to be added in case an exception is thrown
 			*@return mixed Number casted to the proper type
-			*@throws \Exception $num is not lower than $cmp
+			*@throws \apf\exception\Validate $num is not lower than $cmp
 			*/
 
 			public function mustBeLowerOrEqualThan($num,$cmp,$msg=NULL,$exCode=0){
@@ -209,7 +276,7 @@
 
 				$msg	=	empty($msg)	?	"Number $num is not lower or equal to $cmp"	:	$msg;
 
-				throw new \Exception($msg);
+				throw new \apf\exception\Validate($msg);
 
 			}
 
@@ -223,7 +290,7 @@
 			*@param String $msg A message to be shown in case an exception is thrown
 			*@param int $exCode A code to be added in case an exception is thrown
 			*@return mixed Number casted to the proper type
-			*@throws \Exception $num is not between $min and $max
+			*@throws \apf\exception\Validate $num is not between $min and $max
 			*/
 
 			public static function mustBeBetween($num,$min,$max,$msg=NULL,$exCode=0){
@@ -240,7 +307,7 @@
 
 				$msg	=	empty($msg)	?	"Number $num is not between $min and $max"	:	$msg;
 
-				throw new \Exception($msg);
+				throw new \apf\exception\Validate($msg);
 
 			}
 
@@ -252,9 +319,9 @@
 			*@param String $msg A message to be shown in case an exception is thrown
 			*@param int $exCode A code to be added in case an exception is thrown
 			*@return boolean TRUE $num is a power of $pow
-			*@throws \Exception Exception with code -1 if $pow is not greater than 0
-			*@throws \Exception Exception with code -2 if $num is not greater than 0
-			*@throws \Exception Exception with code $exCode and message $msg
+			*@throws \apf\exception\Validate \apf\exception\Validate with code -1 if $pow is not greater than 0
+			*@throws \apf\exception\Validate \apf\exception\Validate with code -2 if $num is not greater than 0
+			*@throws \apf\exception\Validate \apf\exception\Validate with code $exCode and message $msg
 			*/
 
 			public static function mustBePowerOf($num,$pow,$msg=NULL,$exCode=0){
@@ -278,7 +345,7 @@
 
 					$msg	=	empty($msg)	?	"Number $num is not a power of $pow"	:	$msg;
 
-					throw new \Exception($msg,$exCode);
+					throw new \apf\exception\Validate($msg,$exCode);
 
 				}
 

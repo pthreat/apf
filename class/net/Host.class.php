@@ -55,7 +55,7 @@
 
 				}catch(\Exception $e){
 
-					$this->host			=	\apf\Validator::emptyString($host,"Must enter host name or IP address");
+					$this->host			=	\apf\validate\String::mustBeNotEmpty($host,"Must enter host name or IP address");
 					$this->ipNotation	=	FALSE;
 
 				}

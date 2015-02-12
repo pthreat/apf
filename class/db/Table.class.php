@@ -92,7 +92,7 @@
 
 			public function setSchema($schema){
 
-				$this->schema	=	\apf\Validator::emptyString($schema,"Schema name can't be empty");
+				$this->schema	=	\apf\validate\String::mustBeNotEmpty($schema,"Schema name can't be empty");
 
 			}
 
@@ -104,7 +104,7 @@
 
 			public final function setName($name=NULL){
 
-				$this->name	=	\apf\Validator::emptyString($name,"Table name can't be empty");
+				$this->name	=	\apf\validate\String::mustBeNotEmpty($name,"Table name can't be empty");
 				
 			}
 
@@ -124,7 +124,7 @@
 			public final function addColumn($name,$value){
 
 				$requiredKeys	= ["name","type","extra","key","charset","maxlen","octlen","null","pdo_type","php_type"];
-				\apf\Validator::arrayKeys($requiredKeys,$value);
+				\apf\validate\Vector::mustHaveKeys($requiredKeys,$value);
 				$this->columns[$name]	=	$value;
 
 			}

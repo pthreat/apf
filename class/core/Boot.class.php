@@ -22,8 +22,8 @@
 
 			private static function addNamespaceMap(Array $map){
 
-				\apf\Validator::arrayKeys(Array("dir","namespace"),$map);
-				$map["dir"]	=	\apf\Validator::emptyString($map["dir"]);
+				\apf\validate\Vector::mustHaveKeys(Array("dir","namespace"),$map);
+				$map["dir"]	=	\apf\validate\String::mustBeNotEmpty($map["dir"]);
 				self::$namespaceMap[]	=	$map;
 
 			}

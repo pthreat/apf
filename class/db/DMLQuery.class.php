@@ -10,6 +10,7 @@
 	*
 	*This class is meant to be an intermmediary between all different
 	*database types (mysql,pgsql,oracle,sql server, etc).
+	*This class does not contain ANY SQL specific instructions.
 	*/
 
 	namespace apf\db{
@@ -25,7 +26,6 @@
 			private	$group		=	Array();
 			private	$order		=	Array();
 
-
 			/**
 			*Specify list of columns to fetch
 			*
@@ -36,9 +36,9 @@
 
 			public function columns($columns=NULL){
 
-				\apf\Validator::emptyString("Must specify columns");
-
 				if(is_string($columns)){
+
+					\apf\validate\String::mustBeNotEmpty("Must specify columns");
 
 					$columns	=	Array($this->parseColumns($columns));
 
@@ -50,138 +50,7 @@
 
 			}
 
-			/**
-			*Provides a way to map a single column of a row to a class.
-			*This is VERY handy and avoids lots of extra operations.
-			*
-			*@param String $name The name of the column
-			*@param String $class The class which the column should be mapped to
-			*@param String $method Optional, provide a method which should be called, 
-			*if no method is specified, the value of the column will be passed to the constructor of the class.
-			*The method should NOT be static.
-			*
-			*/
-
-			public function mapColumnToClass($name,$class,$method=NULL){
-
-				$this->columnMap[$name]	=	Array(
-															"type"	=>	"instance",
-															"value"	=>	$class,
-															"method"	=>	$method
-				);
-
-				return $this;
-
-			}
-
-			/**
-			*Provides a way to map a single column of a row to a STATIC METHOD of class.
-			*This is VERY handy and avoids lots of extra operations.
-			*
-			*@param String $name The name of the column
-			*@param String $class The class which the column should be mapped to
-			*@param String $method REQUIRED, the static method that should be called
-			*if no method is specified, this method will assume that you have a STATIC method in this class named
-			*columnMap.
-			*The method HAS TO BE be static.
-			*
-			*/
-
-			public function mapColumnToStaticClass($name,$class,$method=NULL){
-
-				$this->columnMap[$name]	=	Array(
-															"type"	=>	"static",
-															"value"	=>	$class,
-															"method"	=>	$method,
-				);
-
-				return $this;
-
-			}
-
-			/**
-			*Maps a column to a callable function, anonymous or not.
-			*This provides a way to do some "hacking" because it allows you
-			*to map a column to a class and method, or to a static method or to whatever you want.
-			*However this kind of hacking is discouraged, due to this making your code HARD to read.
-			*If you plan using this for mapping a column to a class please notice that it is heavily discouraged.
-			*@param Callable $function declared or anonymous function 
-			*@param String $column Column name
-			*
-			*@return DMLQuery Instance of this object.
-			*/
-
-			public function mapColumnToFunction($name=NULL,callable $function){
-
-				$this->columnMap[$column]	=	Array(
-																"type"	=>	"callback",
-																"value"	=>	$function
-				);
-
-				return $this;
-
-			}
-
-			/**
-			*Maps an entire row to a class
-			*@param String $class Class name
-			*@param String $method Optional method to be called
-			*/
-
-			public function mapRowToClass($class,$method=NULL){
-
-				$this->rowMap	=	Array(
-													"type"	=>	"class",
-													"value"	=>	$class,
-													"method"	=>	$method
-				);
-
-				return $this;
-
-			}
-
-
-
-			/**
-			*Fetch an entire row as a class
-			*@param String $class Class name
-			*@param String $method Optional method to be called
-			*/
-
-			public function fetchAs($class=NULL,$method=NULL){
-
-				\apf\Validator::emptyString($class,"Must specify class to fetch rows as the specified class");
-
-				if(!is_null($method)){
-
-					$refMethod	=	new \ReflectionMethod("$class::$method");
-					
-					if(!$refMethod->isStatic()){
-
-						throw new \Exception("Class \"$class\" needs to have a *STATIC* method named \"$method\" ");
-
-					}
-
-				}else{
-
-					$reflectionClass = new \ReflectionClass($class);
-
-				}
-
-				$this->fetchAs	=	Array("class"=>$class,"method"=>$refMethod);
-
-				return $this;
-
-			}
-
-			public function getFetchAs(){
-
-				return $this->fetchAs;
-
-			}
-
 			private function parseColumns($columns){
-
 
 				$parsedColumns	=	Array();
 
@@ -212,6 +81,7 @@
 						$tablesAmount	=	sizeof($this->getTables());
 
 						foreach($table->getColumns() as $column){
+
 							var_dump($column);
 							die();
 
@@ -237,14 +107,14 @@
 
 			public function where($clause=NULL){
 
-				$this->where	=	\apf\Validator::emptyString($clause,"Where clause can't be empty");
+				$this->where	=	\apf\validate\String::mustBeNotEmpty($clause,"WHERE clause can't be empty");
 				return $this;
 
 			}
 
 			public function having($clause){
 
-				$this->having	=	\apf\Validator::emptyString($clause,"Where clause can't be empty");
+				$this->having	=	\apf\validate\String::mustBeNotEmpty($clause,"HAVING clause can't be empty");
 				return $this;
 
 			}

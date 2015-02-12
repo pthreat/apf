@@ -56,7 +56,7 @@
 
 			private static function instanceExists($name=NULL){
 
-				\apf\Validator::emptyString($name,"When checking for existing instance, name can't be empty");
+				\apf\validate\String::mustBeNotEmpty($name,"When checking for existing instance, name can't be empty");
 				return array_key_exists($name,self::$instances);
 
 			}

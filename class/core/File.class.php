@@ -137,7 +137,7 @@
 
 			public function setReadFunction($fName=NULL){
 
-				$fName	=	\apf\Validator::emptyString($fName);
+				$fName	=	\apf\validate\String::mustBeNotEmpty($fName);
 
 				if(!function_exists($fName)){
 

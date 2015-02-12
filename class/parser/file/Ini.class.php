@@ -193,7 +193,7 @@
 
 				$like	=	trim($like,'/');
 
-				\apf\Validator::emptyString($like,"Expecting regex");
+				\apf\validate\String::mustBeNotEmpty($like,"Expecting regex");
 
 				$like			=	preg_quote($like,'/');
 				$like			=	"/$like/";

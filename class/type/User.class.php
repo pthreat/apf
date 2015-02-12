@@ -21,7 +21,7 @@
 
 			public function setName($name=NULL){
 
-				$this->name	=	\apf\Validator::emptyString($name);
+				$this->name	=	\apf\validate\String::mustBeNotEmpty($name);
 
 			}
 

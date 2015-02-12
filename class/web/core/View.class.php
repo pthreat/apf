@@ -59,7 +59,7 @@
 
 			public function addTemplate($template=NULL,$first=NULL){
 
-				\apf\Validator::emptyString($template,"Template to be added can't be empty");
+				\apf\validate\String::mustBeNotEmpty($template,"Template to be added can't be empty");
 
 				$config		=	\apf\core\Config::getSection("view");
 				$path			=	$config->template_path;
@@ -120,7 +120,7 @@
 
 				$template	=	$tpl;
 
-				\apf\Validator::emptyString($tpl,"Must provide template name to load");
+				\apf\validate\String::mustBeNotEmpty($tpl,"Must provide template name to load");
 
 				$config	=	\apf\core\Config::getSection("view");
 				$this->validateConfig($config);

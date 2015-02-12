@@ -46,7 +46,7 @@
 
 			public function setId($id){
 
-				$id	=	\apf\Validator::emptyString($id,"Connection ID must be not empty");
+				$id	=	\apf\validate\String::mustBeNotEmpty($id,"Connection ID must be not empty");
 
 				if(strpos($id,' ')){
 
@@ -92,7 +92,7 @@
 
 				}
 
-				$missing	=	\apf\Validator::arrayKeys(["id","host","port","schemas","user","pass","driver"],$data,$throw=FALSE);
+				$missing	=	\apf\validate\Vector::mustHaveKeys(["id","host","port","schemas","user","pass","driver"],$data,$throw=FALSE);
 
 				if(is_string($missing)){
 
@@ -121,7 +121,7 @@
 
 			public function setDriver($driver=NULL){
 
-				$driver	=	strtolower(\apf\Validator::emptyString($driver,"Driver name can't be empty"));
+				$driver	=	strtolower(\apf\validate\String::mustBeNotEmpty($driver,"Driver name can't be empty"));
 				if(!\apf\db\Adapter::isAvailableDriver($driver)){
 
 					$msg	=	"Given database driver \"$driver\" doesn't seems to be available,". 
@@ -157,7 +157,7 @@
 
 				}
 
-				$this->schemas[]	=	\apf\Validator::emptyString($name,"Schema name can't be empty");
+				$this->schemas[]	=	\apf\validate\String::mustBeNotEmpty($name,"Schema name can't be empty");
 
 			}
 

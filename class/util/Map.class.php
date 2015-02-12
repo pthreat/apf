@@ -1,11 +1,12 @@
 <?php
-	
+
 	/**
 	*This class is part of Apollo PHP Framework.
 	*
-	*Namespace	:	apf\validate
-	*Class		:	Ip
-	*Description:	A class used to validate ip addresses, version 6 and version 4 or both.
+	*Namespace	:	\apf\util
+	*Class		:	Map
+	*Description:	Maps array keys to a class, a class method, an instance, etc.
+	*
 	*
 	*Author		:	Federico Stange <jpfstange@gmail.com>
 	*License		:	3 clause BSD
@@ -38,59 +39,74 @@
 	*OF SUCH DAMAGE.
 	*
 	*/
-	namespace apf\validate{
 
-		class IP{
+	namespace db{
 
-			public static function version4($ip,$msg=NULL,$exCode=0){
+		class Map{
 
-				$validIpv4	=	filter_var($ip,FILTER_VALIDATE_IP,FILTER_FLAG_IPV4);
+			private	$class		=	NULL;
+			private	$method		=	NULL;
 
-				if($validIpv4){
+			private	$instance	=	Array(
+													"instance"	=>	NULL,
+													"method"		=>	NULL
+			);
 
-					return TRUE;
+			private	$callable	=	NULL;
+			private	$value		=	NULL;
 
-				}
+			public function __construct($value){
 
-				$msg	=	empty($msg)	?	"Invalid IPV4 address" : $msg;
-
-				throw new \apf\exception\Validate($msg,$exCode);
-
-			}
-
-			public static function version6($ip,$msg=NULL,$exCode=0){
-
-				$validIpv6	=	filter_var($ip,FILTER_VALIDATE_IP,FILTER_FLAG_IPV6);
-
-				if($validIpv6){
-
-					return TRUE;
-
-				}
-
-				$msg	=	empty($msg)	?	"Invalid IPV6 address" : $msg;
-
-				throw new \apf\exception\Validate($msg,$exCode);
+				$this->value	=	$value;
 
 			}
 
-			public function address($ip,$msg=NULL,$exCode=0){
+			public function toInstance($obj,$method){
 
-				if(self::version4($ip,$msg,$exCode){
+				\apf\validate\Instance::mustHaveMethod($obj,$method);
+				$this->instance	=	Array("instance"=>$obj,"method"=>$method);
 
-					return TRUE;
+			}
 
-				}
+			public function getInstance(){
 
-				if(self::version6($ip,$msg,$exCode)){
+				return $this->instance;
 
-					return TRUE;
+			}
 
-				}
+			public function toClass($name=NULL){
 
-				$msg	=	empty($msg)	?	"Invalid IP address" : $msg;
+				$this->class	=	\apf\validate\Class_::mustExist($name);
 
-				throw new \apf\exception\Validate($msg,$exCode);
+			}
+
+			public function getClass(){
+
+				return $this->class;
+
+			}
+
+			public function toClassMethod($class,$method)
+
+				$this->method	=	\apf\validate\Class_::mustHaveMethod($class,$method);
+
+			}
+
+			public function getClassMethod(){
+
+				return $this->method;
+				
+			}
+
+			public function toCallable(callable $callable){
+
+				$this->callable	=	$callable;
+
+			}
+
+			public function getCallable(){
+
+				return $this->callable;
 
 			}
 
@@ -98,3 +114,4 @@
 
 	}
 
+?>

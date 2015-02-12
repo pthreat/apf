@@ -471,7 +471,7 @@
 
 			public final static function isAvailableDriver($driver=NULL){
 
-				\apf\Validator::emptyString($driver,"Driver name can't be empty");
+				\apf\validate\String::mustBeNotEmpty($driver,"Driver name can't be empty");
 				$drivers	=	self::getDrivers();
 
 				return in_array($driver,$drivers);

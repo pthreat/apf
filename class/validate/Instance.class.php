@@ -1,11 +1,12 @@
-<?php
-	
+<?php 
+
 	/**
 	*This class is part of Apollo PHP Framework.
 	*
 	*Namespace	:	apf\validate
-	*Class		:	Ip
-	*Description:	A class used to validate ip addresses, version 6 and version 4 or both.
+	*Class		:	Instance
+	*Description:	A class for validating certain object instance properties
+	*
 	*
 	*Author		:	Federico Stange <jpfstange@gmail.com>
 	*License		:	3 clause BSD
@@ -38,63 +39,59 @@
 	*OF SUCH DAMAGE.
 	*
 	*/
-	namespace apf\validate{
 
-		class IP{
+	namespace \apf\validate{
 
-			public static function version4($ip,$msg=NULL,$exCode=0){
+		class Instance{
 
-				$validIpv4	=	filter_var($ip,FILTER_VALIDATE_IP,FILTER_FLAG_IPV4);
+			public static function mustBeInstance($obj,$msg=NULL,$exCode=0){
 
-				if($validIpv4){
+				if(!is_object($obj)){
 
-					return TRUE;
+					$msg	=	empty($msg)	?	"Provided value must be an object instance"	:	$msg;
+
+					throw new \apf\exception\Validate($msg,$exCode);
 
 				}
 
-				$msg	=	empty($msg)	?	"Invalid IPV4 address" : $msg;
-
-				throw new \apf\exception\Validate($msg,$exCode);
+				return TRUE;
 
 			}
 
-			public static function version6($ip,$msg=NULL,$exCode=0){
+			public static function mustBeInstanceOfClass($obj,$class,$msg=NULL,$exCode=0){
 
-				$validIpv6	=	filter_var($ip,FILTER_VALIDATE_IP,FILTER_FLAG_IPV6);
+				self::mustBeInstance($obj,$msg,-1);
 
-				if($validIpv6){
+				if(!($obj instanceof $obj)){
 
-					return TRUE;
+					$msg	=	empty($msg)	?	"Provided instance is not an instance of class $class"	:	$msg;
+					throw new \apf\exception\Validate($msg,$exCode);
 
 				}
 
-				$msg	=	empty($msg)	?	"Invalid IPV6 address" : $msg;
-
-				throw new \apf\exception\Validate($msg,$exCode);
+				return TRUE;
 
 			}
 
-			public function address($ip,$msg=NULL,$exCode=0){
+			public static function mustHaveMethod($obj,$method,$msg=NULL,$exCode=NULL){
 
-				if(self::version4($ip,$msg,$exCode){
+				self::mustBeInstance($obj,$msg,-1);
 
-					return TRUE;
+				$robj	=	new \ReflectionObject($obj);
+
+				if(!$robj->hasMethod($method)){
+
+					$msg	=	empty($msg)	?	"Given object doesn't has a method named $method"	:	$msg;
+
+					throw new \apf\exception\Validate($msg,$exCode);
 
 				}
 
-				if(self::version6($ip,$msg,$exCode)){
+				return TRUE;
 
-					return TRUE;
-
-				}
-
-				$msg	=	empty($msg)	?	"Invalid IP address" : $msg;
-
-				throw new \apf\exception\Validate($msg,$exCode);
 
 			}
 
 		}
 
 	}
-

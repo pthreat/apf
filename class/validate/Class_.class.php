@@ -5,7 +5,10 @@
 	*
 	*Namespace	:	apf\validate
 	*Class		:	Class_
-	*Description:	A class for validating vertain class properties
+	*Description:	A class for validating vertain class properties, the lower dash is due 
+	*					PHP lacking the ability to be able to distinguish between the class keyword
+	*					as a class name. Since there is not a significant synonym in the English language
+	*					to be able to describe "class", I've used a lower dash instead.
 	*
 	*
 	*Author		:	Federico Stange <jpfstange@gmail.com>
@@ -40,35 +43,235 @@
 	*
 	*/
 
-	namespace \apf\validate{
+	namespace apf\validate{
 
 		class Class_{
 
-			public function exists($className){
+			/**
+			*Checks if a class exists.
+			*@param String $name Class name
+			*@throws \apf\exception\Validate Only if the class name is empty
+			*@return boolean TRUE Class exists
+			*@return boolean FALSE Class doesn't exists
+			*/
 
-				if(!class_exists($className)){
+			public static function exists($name){
 
-					throw new \Exception("Unexistent class $className");
+				\apf\validate\String::mustBeNotEmpty($name,"Class name must not be empty",-1);
+
+				return class_exists($name);
+
+			}
+
+			/**
+			*Checks if a class exists, imperative mode.
+			*If the class doesn't exists it will throw an Exception
+			*@param String $name class name
+			*@param String $msg Exception message if any
+			*@param Int $exCode Exception code
+			*@throws \apf\exception\Validate with code -1 if the class name is empty
+			*@throws \apf\exception\Validate if the class doesn't exists
+			*/
+
+			public static function mustExist($name,$msg=NULL,$exCode=0){
+
+				if(!self::exists($name)){
+
+					$msg	=	empty($msg)	?	"Unexistent class $name"	:	$msg;
+
+					throw new \apf\exception\Validate($msg,$exCode);
 
 				}
 
-				return TRUE;
-
 			}
 
-			public static function hasMethod($class,$method){
+			/**
+			*Checks if a class has a method named $method.
+			*@param String $name class name
+			*@param String $method method to be checked 
+			*@throws \apf\exception\Validate with code -1 if the class name is empty
+			*@throws \apf\exception\Validate with code -2 if the class doesn't exists
+			*@throws \apf\exception\Validate with code -3 if the method name is empty
+			*@return boolean TRUE if the class has a method named $method
+			*@return boolean FALSE if the class doesn't has a method named $method
+			*/
 
-				\apf\validate\String::isEmpty($class,"Must specify a class name");
-				\apf\validate\String::isEmpty($method,"Must specify a method name");
+			public static function hasMethod($name,$method){
 
-				self::exists($name,"Can't check if a method exists because the class is unknown");
+				self::mustExist($name,NULL,-2);
+
+				\apf\validate\String::mustBeNotEmpty($name,"Method name must not be empty",-3);
 
 				$rc	=	new \ReflectionClass($name);
-				if(!$rc->hasMethod($method);
 
+				return $rc->hasMethod($method);
 
 			}
 
+			/**
+			*Checks if a class has a method named $method (imperative mode).
+			*@param String $name class name
+			*@param String $method method to be checked 
+			*@param String $msg Exception message if any
+			*@param Int $exCode Exception code
+			*@throws \apf\exception\Validate with code -1 if the class name is empty
+			*@throws \apf\exception\Validate with code -2 if the class doesn't exists
+			*@throws \apf\exception\Validate with code -3 if the method name is empty
+			*@throws \apf\exception\Validate with code $exCode if method doesn't exists
+			*/
+
+			public static function mustHaveMethod($name,$method,$msg=NULL,$exCode=0){
+
+				if(!self::hasMethod($name,$method)){
+
+					$msg	=	empty($msg) ? "Class $name doesn't has a method named $method"	:	$msg;
+
+					throw new \apf\exception\Validate($msg,$method,$exCode);
+
+				}
+
+				return $method;
+
+			}
+
+			/**
+			*Checks if a class has a public method named $method.
+			*@param String $name class name
+			*@param String $method method to be checked 
+			*@throws \apf\exception\Validate with code -1 if the class name is empty
+			*@throws \apf\exception\Validate with code -2 if the class doesn't exists
+			*@throws \apf\exception\Validate with code -3 if the method name is empty
+			*@return boolean TRUE if the class has a public method named $method
+			*@return boolean FALSE if the class doesn't has a public method named $method
+			*/
+
+			public static function hasPublicMethod($name,$method){
+
+				if(!self::hasMethod($name,$method)){
+
+					return NULL;
+
+				}
+
+				$rc		=	new \ReflectionClass($name);
+				$methods	=	$rc->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+				return (boolean)$methods;
+
+			}
+
+			/**
+			*Checks if a class has a public method named $method (imperative mode).
+			*@param String $name class name
+			*@param String $method method to be checked 
+			*@param String $msg Exception message if any
+			*@param Int $exCode Exception code
+			*@throws \apf\exception\Validate with code -1 if the class name is empty
+			*@throws \apf\exception\Validate with code -2 if the class doesn't exists
+			*@throws \apf\exception\Validate with code -3 if the method name is empty
+			*@throws \apf\exception\Validate with code $exCode if method doesn't exists
+			*/
+
+			public static function mustHavePublicMethod($name,$method,$msg=NULL,$exCode=0){
+
+				if(!self::hasPublicMethod($name,$method)){
+
+					$msg	=	empty($msg) ? "Class $name doesn't has a public method named \"$method\""	:	$msg;
+
+					throw new \apf\exception\Validate($msg,$exCode);
+
+				}
+
+				return $method;
+
+			}
+
+			/**
+			*Checks if a class has a constant named $constant
+			*@param String $name class name
+			*@param String $constant constant to be checked 
+			*@throws \apf\exception\Validate with code -1 if the class name is empty
+			*@throws \apf\exception\Validate with code -2 if the class doesn't exists
+			*@throws \apf\exception\Validate with code -3 if the constant name is empty
+			*@return boolean TRUE if the class has a constant named $constant
+			*@return boolean FALSE if the class doesn't has a constant named $constant
+			*/
+
+			public static function hasConstant($name,$constant){
+
+				self::mustExist($name,NULL,-2);
+
+				\apf\validate\String::mustBeNotEmpty($name,"Constant name must not be empty",-3);
+
+				$rc	=	new \ReflectionClass($name);
+
+				return $rc->hasConstant($constant);
+
+			}
+
+			/**
+			*Checks if a class has a constant named $constant
+			*@param String $name class name
+			*@param String $constant constant to be checked 
+			*@throws \apf\exception\Validate with code -1 if the class name is empty
+			*@throws \apf\exception\Validate with code -2 if the class doesn't exists
+			*@throws \apf\exception\Validate with code $exCode if constant $constant doesn't exists
+			*/
+
+			public static function mustHaveConstant($name,$constant,$msg=NULL,$exCode=0){
+
+				if(!self::hasConstant($name,$constant)){
+
+					$msg	=	empty($msg)	?	"Class $name doesn't has a constant named $constant"	:	$msg;
+
+					throw new \apf\exception\Validate($msg,$exCode);	
+
+				}
+
+			}
+
+			/**
+			*Checks if a class has an attribute named $attribute
+			*@param String $name class name
+			*@param String $attribute attribute to be checked 
+			*@throws \apf\exception\Validate with code -1 if the class name is empty
+			*@throws \apf\exception\Validate with code -2 if the class doesn't exists
+			*@throws \apf\exception\Validate with code -3 if the attribute name is empty
+			*@return boolean TRUE if the class has a attribute named $attribute
+			*@return boolean FALSE if the class doesn't has a attribute named $attribute
+			*/
+
+			public static function hasAttribute($name,$attribute){
+
+				self::mustExist($name,NULL,-2);
+
+				\apf\validate\String::mustNotBeEmpty($attribute,"Attribute name can't be empty",-3);
+
+				$rc	=	new \ReflectionClass($name);
+				return $rc->hasAttribute($attribute);
+
+			}
+
+			/**
+			*Checks if a class has an attribute named $attribute (imperative mode)
+			*@param String $name class name
+			*@param String $attribute attribute to be checked 
+			*@throws \apf\exception\Validate with code -1 if the class name is empty
+			*@throws \apf\exception\Validate with code -2 if the class doesn't exists
+			*@throws \apf\exception\Validate with code -3 if the attribute name is empty
+			*@throws \apf\exception\Validate with code $exCode if the attribute doesn't exists
+			*/
+
+			public static function mustHaveAttribute($name,$attribute,$msg=NULL,$exCode=0){
+
+				if(!self::hasAttribute($name,$attribute)){
+
+					$msg	=	empty($msg)	?	"Class $name doesn't has an attribute named $attribute"	:	$msg;
+					throw new \apf\exception\Validate($msg,$exCode);
+
+				}
+
+			}
 
 		}
 

@@ -27,7 +27,7 @@
 
 			public static function getInstanceByName($name=NULL){
 
-				$name		=	\apf\Validator::emptyString($name);
+				$name		=	\apf\validate\String::mustBeNotEmpty($name);
 				$result	=	(new \apf\db\mysql5\Select("countries"))
 								->fields(['id','name'])
 								->where("name=$name")

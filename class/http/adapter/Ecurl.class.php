@@ -44,7 +44,7 @@
 
 			public function addRequestHeader($name=NULL,$value=NULL){
 
-				\apf\Validator::emptyString($name,"Header name must be set in order to add a header");
+				\apf\validate\String::mustBeNotEmpty($name,"Header name must be set in order to add a header");
 
 				$this->_requestHeaders[]	=	"$name: $value";
 

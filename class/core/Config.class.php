@@ -53,7 +53,7 @@
 
 			public function getIniConfig($name=NULL){
 
-				\apf\Validator::emptyString($name,"Must provide config name");
+				\apf\validate\String::mustBeNotEmpty($name,"Must provide config name");
 				return self::getInstance("ini:$name");
 
 			}

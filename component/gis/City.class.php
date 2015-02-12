@@ -40,7 +40,7 @@
 
 			public static function getInstanceByName(Region $region,$name=NULL){
 
-				$id		=	\apf\Validator::emptyString($name);
+				$id		=	\apf\validate\String::mustBeNotEmpty($name);
 
 				$where	=	Array(	
 											["field"=>"name","value"=>$name],

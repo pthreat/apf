@@ -22,7 +22,7 @@
 
 				$expectedKeys	=	Array("name","type","php_type","pdo_type");
 
-				\apf\Validator::arrayKeys($expectedKeys,$columnData);
+				\apf\validate\Vector::mustHaveKeys($expectedKeys,$columnData);
 
 				$this->setName($columnData["name"]);
 				$this->setType($columnData["type"]);
@@ -61,7 +61,7 @@
 
 			public function setPHPType($type){
 
-				$type			=	\apf\Validator::emptyString($type,"PHP Type can't be empty");
+				$type			=	\apf\validate\String::mustBeNotEmpty($type,"PHP Type can't be empty");
 				$validTypes	=	["int","double","string"];
 
 				if(!in_array($type,$validTypes)){
@@ -82,7 +82,7 @@
 
 			public function setPDOType($type){
 
-				$type			=	\apf\Validator::emptyString($type,"PDO Type can't be empty");
+				$type			=	\apf\validate\String::mustBeNotEmpty($type,"PDO Type can't be empty");
 				$validTypes	=	["PDO::PARAM_STR","PDO::PARAM_LOB","PDO::PARAM_INT","PDO:PARAM_BOOL"];
 
 				if(!in_array($type,$validTypes)){
@@ -110,7 +110,7 @@
 
 			public function setName($name=NULL){
 
-				$this->name	=	\apf\Validator::emptyString($name,"Column name can't be empty");
+				$this->name	=	\apf\validate\String::mustBeNotEmpty($name,"Column name can't be empty");
 
 			}
 
@@ -134,7 +134,7 @@
 
 			public function setAlias($alias){
 
-				$this->alias	=	\apf\Validator::emptyString("Column alias must not be empty");
+				$this->alias	=	\apf\validate\String::mustBeNotEmpty("Column alias must not be empty");
 
 			}
 
@@ -246,7 +246,7 @@
 
 			public function setType($type=NULL){
 
-				$this->type	=	\apf\Validator::emptyString($type,"Column type can't be empty");
+				$this->type	=	\apf\validate\String::mustBeNotEmpty($type,"Column type can't be empty");
 
 			}
 

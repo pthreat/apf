@@ -16,6 +16,28 @@
 
 			}
 
+			/**
+			*Provides a way to map a SQL Array result *entirely* to a class
+			*an object, a callable, etc OR a way to map EACH array (column) index
+			*to different objects, classes, or callables.
+			*@param Array $map a map of \apf\util\Map objects
+			*@param \apf\util\Map $map a single map 
+ 			*/
+
+
+			public function map($map,$type,$config=NULL){
+
+				if(is_array($map)){
+
+					foreach($map as $m){
+					}
+
+				}
+
+				$this->mappings	=	$map;
+
+			}
+
 			private function fetch(){
 
 				$result	=	$this->stmt->fetch(\PDO::FETCH_ASSOC);
@@ -63,7 +85,9 @@
 			}
 
 			public function rewind(){
+
 				$this->position	=	0;
+
 			}
 
 			public function __toString(){
