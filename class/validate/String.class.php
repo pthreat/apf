@@ -84,6 +84,22 @@
 			}
 
 			/**
+			*Checks if a string begins with a certain string
+			*@param String $string String to be checked
+			*@param String $begin String to compare if $string begins with this very same string.
+			*@return boolean TRUE The $string begins with $begin
+			*@return boolean FALSE The $string doesn't begins with $begin
+			*/
+
+			public static function beginsWith($string,$begin){
+
+				$string	=	substr($string,0,strlen($begin));
+
+				return $string==$begin;
+
+			}
+
+			/**
 			*Check if the length of a string is between specified limits.
 			*@param Int $min Minimum limit
 			*@param Int $maximum Maximum limit

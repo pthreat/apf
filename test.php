@@ -4,10 +4,16 @@
 
 	\apf\core\Boot::init();
 
-	class test{
+	abstract class test{
+		public $prop=NULL;
+
 		public function blah(){
+		}
+
+		abstract public static function bleh();
+		private function a(){
 		}
 	}
 
-	\apf\validate\Class_::mustHavePublicMethod("test","bla");
+	var_dump(\apf\validate\Class_::hasMethod("test","bleh",'abstract'));
 
