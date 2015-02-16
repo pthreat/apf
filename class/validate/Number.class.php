@@ -280,9 +280,37 @@
 
 			}
 
-
 			/**
 			*Check if a number is between two numbers
+			*
+			*@param mixed $min Lower range
+			*@param mixed $max Higher range
+			*@param mixed $len String length to be compared
+			*@param String $msg A message to be shown in case an exception is thrown
+			*@param int $exCode A code to be added in case an exception is thrown
+			*@return mixed Number casted to the proper type
+			*@throws \apf\exception\Validate $num is not between $min and $max
+			*/
+
+			public static function isBetween($min,$max,$num,$msg,$exCode){
+
+				$num	=	static::cast($num);
+				$min	=	static::cast($min);
+				$max	=	static::cast($max);
+
+				if($num >= $min && $num <= $max){
+
+					return $num;
+
+				}
+
+				$msg	=	empty($msg)	?	"Number $num is not between $min and $max"	:	$msg;
+
+			}
+
+
+			/**
+			*Check if a number is between two numbers (imperative mode)
 			*
 			*@param mixed $min Lower range
 			*@param mixed $max Higher range
