@@ -285,7 +285,7 @@
 			*
 			*@param mixed $min Lower range
 			*@param mixed $max Higher range
-			*@param mixed $len String length to be compared
+			*@param mixed $num Number to be compared
 			*@param String $msg A message to be shown in case an exception is thrown
 			*@param int $exCode A code to be added in case an exception is thrown
 			*@return mixed Number casted to the proper type
