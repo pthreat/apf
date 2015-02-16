@@ -50,9 +50,9 @@
 			*@param boolean $useTrim wether to trim the string or not.
 			*@param String $msg \apf\exception\Validate message.
 			*@param Int $exCode \apf\exception\Validate code.
-			*@throws \apf\exception\Validate in case the given string is effectively empty.
-			*@return String The string (trimmed or not, this is specified with the $useTrim parameter).
+			*@return Bool The validation of the string to check.
 			*/
+
 			
 			public static function isEmpty($string,$useTrim=TRUE,$msg=NULL,$exCode=0){
 
@@ -66,11 +66,20 @@
 
 			}
 
+			/**
+			*Checks that a string is not empty (imperative mode)
+			*@param String $string The string to be checked.
+			*@param boolean $useTrim wether to trim the string or not.
+			*@param String $msg \apf\exception\Validate message.
+			*@param Int $exCode \apf\exception\Validate code.
+			*@throws \apf\exception\Validate in case the given string is effectively empty (imperative mode).
+			*/
+
 			public static function mustBeNotEmpty($string,$useTrim=TRUE,$msg=NULL,$exCode=0){
 
-				if(self::isEmpty($string,$useTrim)){
+				if(self::isEmpty($msg,$useTrim)){
 
-					if(empty($msg)){
+					if(Empty($msg)){
 
 						$msg	=	'String can not be empty. Using trim: %s';
 						$msg	=	sprintf($msg,$useTrim	?	'yes'	:	'no');
@@ -106,11 +115,10 @@
 			*@param String $string The string to be checked
 			*@param String $msg \apf\exception\Validate message.
 			*@param Int $exCode \apf\exception\Validate code.
-			*@throws \apf\exception\Validate in case the given string is not between specified limits
 			*@return Int The string length 
 			*/
 
-			public static function lengthBetween($min,$max,$string,$msg=NULL,$exCode=0){
+			public static function HaslengthBetween($min,$max,$string,$msg=NULL,$exCode=0){
 
 				$min	=	(int)$min;
 				$max	=	(int)$max;
@@ -133,7 +141,7 @@
 			*@return Int The string length 
 			*/
 
-			public static function minLength($min=NULL,$string,$msg=NULL,$exCode=0){
+			public static function hasMinLength($min=NULL,$string,$msg=NULL,$exCode=0){
 
 				$min	=	(int)$min;
 				$len	=	strlen($string);
@@ -154,7 +162,7 @@
 			*@return Int The string length 
 			*/
 
-			public static function maxLength($max,$string,$msg=NULL,$exCode=0){
+			public static function hasMaxLength($max,$string,$msg=NULL,$exCode=0){
 
 				$max	=	(int)$max;
 				$len	=	strlen($string);
